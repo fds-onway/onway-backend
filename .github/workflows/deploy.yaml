@@ -1,0 +1,20 @@
+name: API Deploy
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'docker-compose.yaml'
+  workflow_dispatch:
+
+jobs:
+  imported-workflow:
+    name: Deploy
+    uses: fds-onway/onway-infra/.github/workflows/api_deploy.yaml@main
+    with:
+      app_name: "onway_api"
+      image_name: "onway-api"
+    secrets: inherit
