@@ -19,8 +19,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "prepare": "husky",
-    "postinstall": "npx husky init && echo 'npx eslint --fix' > .husky/pre-commit"
+    "postinstall": "if [ \"$HUSKY\" != \"0\" ]; then npx husky init && echo 'npx eslint --fix' > .husky/pre-commit; fi",
+    "prepare": "if [ \"$HUSKY\" != \"0\" ]; then husky; fi"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
