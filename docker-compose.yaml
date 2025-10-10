@@ -1,9 +1,23 @@
 services:
+  nginx:
+    container_name: onway-nginx
+    image: nginx:stable-alpine3.21
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "./nginx.conf:/etc/nginx/conf.d/default.conf:ro"
+      - "/etc/letsencrypt:/etc/letsencrypt:ro"
+      - "/var/www/html:/var/www/html:ro"
+    depends_on:
+      - api
+    network_mode: "host"
+    restart: unless-stopped
   api:
     container_name: onway-api
     image: ${DOCKER_USERNAME}/onway-api:latest
     ports:
-      - "80:3000"
+      - "3000:3000"
     env_file:
       - .env
     restart: unless-stopped

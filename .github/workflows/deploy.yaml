@@ -3,7 +3,7 @@ name: API Deploy
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - 'src/**'
       - 'public/**'
@@ -15,6 +15,6 @@ jobs:
     name: Deploy
     uses: fds-onway/onway-infra/.github/workflows/api_deploy.yaml@main
     with:
-      app_name: "onway_api"
+      app_name: "onway-api"
       image_name: "onway-api"
     secrets: inherit
