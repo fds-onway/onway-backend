@@ -13,16 +13,15 @@ const {
   DATABASE_URL,
 } = process.env;
 
-// Se você já tiver uma DATABASE_URL, use-a; senão monta a partir das outras vars:
 const url =
   DATABASE_URL ??
   `postgresql://${user}:${password}@${host}:${port}/${database}`;
 
 export default defineConfig({
   out: './drizzle',
-  schema: './src/db/schema',
+  schema: './src/drizzle/schema',
   dialect: 'postgresql',
   dbCredentials: {
-    url, // <-- aqui
+    url,
   },
 });
