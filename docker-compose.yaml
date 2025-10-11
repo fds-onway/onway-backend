@@ -18,6 +18,26 @@ services:
     env_file:
       - .env
     restart: unless-stopped
+  migrations:
+    container_name: onway-migrations
+    image: ${DOCKER_USERNAME}/onway-api:latest
+    env_file:
+      - .env
+    volumes:
+      - "./drizzle:/api/drizzle"
+    command:
+      - "sh"
+      - "-c"
+      - "npx drizzle-kit migrate"
+  debug:
+    container_name: onway-debug
+    image: ${DOCKER_USERNAME}/onway-api:latest
+    env_file:
+      - .env
+    restart: unless-stopped
+    command:
+      - "sleep"
+      - "infinity"
   database:
     container_name: ${POSTGRES_HOST}
     image: postgres:15.13-alpine3.21
