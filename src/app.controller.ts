@@ -1,10 +1,19 @@
 import { Controller, Get } from '@nestjs/common';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiDetailsDto } from './api-details.dto';
 
 @Controller()
+@ApiTags('utils')
 export class AppController {
   constructor() {}
 
   @Get()
+  @ApiResponse({
+    status: 200,
+    description:
+      'Informações gerais da API, como: Se está de pé, quanto tempo está de pé, consumo de memória e CPU, etc.',
+    type: ApiDetailsDto,
+  })
   getApiDetails() {
     const uptime = process.uptime();
     const mem = process.memoryUsage();
