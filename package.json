@@ -5,7 +5,7 @@
   "author": "",
   "private": true,
   "license": "mit",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
