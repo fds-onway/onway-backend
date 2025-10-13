@@ -159,3 +159,55 @@ export default class UserService {
   }
 }
 ```
+
+### Permissões em Rotas
+Este é, caso você criou uma rota que só pode ser acessado por login, ou por administradores e coisas do tipo, já temos código feito para lidar com essa parte, que são baseados em **Guards** do NestJS
+
+Para utilizá-los é bem simples, só utilizar o decorator **@UseGuards** no começo de cada controller:
+```typescript
+@Controller()
+@ApiTags('utils')
+@UseGuards(AuthGuard, IsAdminGuard)
+export class AppController {
+  constructor() {}
+}
+```
+Atualmente tem esses dois:
+- **AuthGuard**: serve para adicionar permissão apenas para usuários logados à uma rota
+- **IsAdminGuard**: serve para adicionar permissão apenas para administradores à uma rota
+
+### Testes
+Toda nova rota, funcionalidade, controller e coisas criadas, deverão vir acompanhadas de:
+- **Testes unitários** para cada unidade de código
+- **Testes E2E** para testar toda e qualquer funcionalidade implementada
+
+Todo teste deve ser feito dentro da pasta `tests/`, **NADA** de colocar dentro da pasta `src` hein!
+
+### Estrutura geral do projeto
+Com todas essas regras definidas, cada módulo terá a seguinte estrutura:
+
+```mermaid
+graph TD
+  A[Controller] --> B[Service]
+  B --> C[Repository]
+  C --> D[DrizzleService]
+  D --> E[(Banco de Dados)]
+
+  A:::layer1
+  B:::layer2
+  C:::layer3
+  D:::layer4
+  E:::layer5
+
+  classDef layer1 fill:#e6f0ff,stroke:#5b8def,stroke-width:2px,color:#000,font-weight:bold;
+  classDef layer2 fill:#f3f9e6,stroke:#a1c349,stroke-width:2px,color:#000,font-weight:bold;
+  classDef layer3 fill:#fff5e6,stroke:#ffb347,stroke-width:2px,color:#000,font-weight:bold;
+  classDef layer4 fill:#ffe6e6,stroke:#ff6961,stroke-width:2px,color:#000,font-weight:bold;
+  classDef layer5 fill:#e8e8e8,stroke:#999,stroke-width:2px,color:#000,font-weight:bold;
+```
+
+- **Controller**: Controla as rotas, códigos, e respostas (com tudo documentado)
+- **Service**: Faz a parte lógica de verificar dados, criar usuários e coisa do tipo
+- **Repository**: Cuida de todas as operações CRUD do banco de dados
+- **DrizzleService**: Classe central de acesso ao banco de dados
+- **Banco de dados**: Onde tudo irá persistir
