@@ -26,7 +26,7 @@ export class DrizzleService implements OnModuleDestroy, OnModuleInit {
 
   async onModuleInit() {
     await this.pool.connect();
-    this.db = drizzle(this.pool, { casing: 'snake_case' });
+    this.db = drizzle(this.pool);
   }
 
   async onModuleDestroy() {

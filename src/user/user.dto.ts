@@ -8,6 +8,11 @@ import {
 } from 'class-validator';
 
 export class RegisterUserDTO {
+  @ApiProperty({
+    example: 'John Doe',
+    description: 'O nome completo do usuário, tendo no mínimo duas palavras',
+    required: true,
+  })
   @IsString()
   @MaxLength(256)
   @Matches(/^\S+(\s+\S+)+$/, {
@@ -18,6 +23,7 @@ export class RegisterUserDTO {
   @ApiProperty({
     example: 'test@example.com',
     description: 'O e-mail que será utilizado no cadastro',
+    required: true,
   })
   @IsEmail()
   email: string;
@@ -27,6 +33,7 @@ export class RegisterUserDTO {
     description:
       'A senha do usuário, devendo ter no mínimo 8 caracteres, 1 número e 1 caracter especial',
     minLength: 8,
+    required: true,
   })
   @IsString()
   @MinLength(8, { message: 'A senha deve ter no mínimo 8 caracteres' })

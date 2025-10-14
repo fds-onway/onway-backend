@@ -8,6 +8,13 @@
       "when": 1760298039607,
       "tag": "0000_majestic_slyde",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1760403763368,
+      "tag": "0001_fat_moon_knight",
+      "breakpoints": true
     }
   ]
 }
