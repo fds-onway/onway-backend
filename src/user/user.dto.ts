@@ -42,3 +42,38 @@ export class RegisterUserDTO {
   })
   password: string;
 }
+
+export class CreatedUserDTO {
+  @ApiProperty({
+    description: 'O ID único do usuário gerado pelo banco de dados.',
+    example: 1,
+  })
+  id: number;
+
+  @ApiProperty({
+    description: 'O nome completo do usuário.',
+    example: 'John Doe',
+  })
+  name: string;
+
+  @ApiProperty({
+    description: 'O e-mail único do usuário.',
+    example: 'test@example.com',
+  })
+  email: string;
+
+  @ApiProperty({
+    description: 'O nível de permissão do usuário no sistema.',
+    example: 'user',
+    enum: ['admin', 'user'],
+  })
+  role: string;
+
+  @ApiProperty({
+    description: 'A data e hora em que o registro do usuário foi criado.',
+    example: '2023-10-27T10:00:00.000Z',
+    type: 'string',
+    format: 'date-time',
+  })
+  createdAt: Date;
+}
