@@ -25,6 +25,20 @@ export class UserService {
     return returningUser;
   }
 
+  async createFromGoogle(details: {
+    name: string;
+    email: string;
+    googleId: string;
+  }): Promise<Partial<User>> {
+    const user = await this.userRepository.createUser({
+      ...details,
+      provider: 'google',
+    });
+
+    const { passwordHash, salt, ...returningUser } = user;
+    return returningUser as User;
+  }
+
   private digest(input: string): string {
     return createHash('sha256').update(input).digest('hex');
   }

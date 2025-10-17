@@ -9,6 +9,26 @@ import {
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  const requiredEnvVariables = [
+    'ENV',
+    'DOCKER_USERNAME',
+    'POSTGRES_HOST',
+    'POSTGRES_USER',
+    'POSTGRES_PASSWORD',
+    'POSTGRES_DB',
+    'POSTGRES_PORT',
+    'GOOGLE_CLIENT_ID',
+    'GOOGLE_CLIENT_SECRET',
+    'GOOGLE_CALLBACK_URL',
+    'TOKEN_SECRET',
+  ];
+
+  for (const envVar of requiredEnvVariables) {
+    if (process.env[envVar] === undefined) {
+      throw new Error(`Variável de ambiente ${envVar} necessária faltando.`);
+    }
+  }
+
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(

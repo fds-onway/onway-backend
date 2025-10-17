@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DrizzleQueryError } from 'drizzle-orm';
+import { DrizzleQueryError, eq } from 'drizzle-orm';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
 import { NewUser, User, user as userModel } from 'src/drizzle/schema';
 import { UserExistsException } from './user.exceptions';
@@ -24,5 +24,14 @@ export default class UserRepository {
     }
 
     return createdUser;
+  }
+
+  async findByEmail(email: string): Promise<User> {
+    const [user] = await this.drizzleService.db
+      .select()
+      .from(userModel)
+      .where(eq(userModel.email, email));
+
+    return user;
   }
 }
