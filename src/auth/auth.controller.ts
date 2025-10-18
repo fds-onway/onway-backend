@@ -13,7 +13,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { User } from 'src/drizzle/schema';
-import { ValidationErrorDTO } from 'src/error.dto';
+import { ConflictErrorDTO, ValidationErrorDTO } from 'src/error.dto';
 import { FailedLoginDTO, LoginDTO, SuccessfulLoginDTO } from './auth.dto';
 import { AuthService } from './auth.service';
 
@@ -22,11 +22,38 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @ApiOperation({
+    summary: 'Iniciar o fluxo de login com Google (Redirecionamento)',
+  })
+  @ApiResponse({
+    status: HttpStatus.FOUND,
+    description: 'Redirecionamento para a página de login do Google.',
+  })
   @Get('google')
   @UseGuards(AuthGuard('google'))
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async googleAuth(@Req() req) {}
 
+  @ApiOperation({
+    summary: 'Rota de callback para o fluxo do Google OAuth2',
+    description:
+      'Esta rota é chamada pelo Google após o usuário conceder a permissão. Ela não deve ser chamada diretamente pelo cliente. O Google enviará um código que será trocado por um perfil de usuário, e a API retornará o JWT da aplicação.',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Autenticação bem-sucedida. Retorna o token de acesso.',
+    type: SuccessfulLoginDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description:
+      'O e-mail retornado pelo Google já está cadastrado com um provedor local (e-mail/senha).',
+    type: ConflictErrorDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.SERVICE_UNAVAILABLE,
+    description: 'Falha na comunicação com o servidor do Google.',
+  })
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   googleAuthRedirect(@Req() req: Request) {
