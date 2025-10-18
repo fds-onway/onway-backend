@@ -19,6 +19,15 @@ export class LoginDTO {
   password: string;
 }
 
+export class GoogleTokenDto {
+  @ApiProperty({
+    description:
+      'O ID Token JWT fornecido pelo SDK do Google Sign-In no cliente mobile',
+  })
+  @IsString()
+  idToken: string;
+}
+
 export class SuccessfulLoginDTO {
   @ApiProperty({
     example:

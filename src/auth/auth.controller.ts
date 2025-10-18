@@ -14,7 +14,12 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { User } from 'src/drizzle/schema';
 import { ConflictErrorDTO, ValidationErrorDTO } from 'src/error.dto';
-import { FailedLoginDTO, LoginDTO, SuccessfulLoginDTO } from './auth.dto';
+import {
+  FailedLoginDTO,
+  GoogleTokenDto,
+  LoginDTO,
+  SuccessfulLoginDTO,
+} from './auth.dto';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -87,5 +92,42 @@ export class AuthController {
     } catch {
       throw new UnauthorizedException('Usuário ou senha incorretos');
     }
+  }
+
+  @ApiOperation({
+    summary: 'Autenticar usuário via Google (Mobile)',
+    description:
+      'Esta rota é para ser usada por aplicativos mobile (Android/iOS). O cliente mobile deve obter um `idToken` do SDK do Google Sign-In e enviá-lo no corpo desta requisição. A API irá verificar o token, encontrar ou criar o usuário, e retornar o JWT da aplicação.',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description:
+      'Autenticação bem-sucedida. Retorna o token de acesso da sua aplicação.',
+    type: SuccessfulLoginDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description:
+      'O `idToken` enviado no corpo da requisição é nulo ou mal formatado.',
+    type: ValidationErrorDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description:
+      'O `idToken` do Google é inválido, expirou ou não pôde ser verificado.',
+    type: FailedLoginDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description:
+      'O e-mail associado a este token do Google já está em uso por uma conta local (e-mail/senha).',
+    type: ConflictErrorDTO,
+  })
+  @Post('google/token')
+  async googleTokenSignIn(@Body() tokenDto: GoogleTokenDto) {
+    const user = await this.authService.verifyGoogleTokenAndSignIn(
+      tokenDto.idToken,
+    );
+    return this.authService.googleLogin(user as User);
   }
 }

@@ -1,6 +1,12 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { createHash } from 'crypto';
+import { OAuth2Client } from 'google-auth-library';
 import { User } from 'src/drizzle/schema';
 import UserRepository from 'src/user/user.repository';
 import { UserService } from 'src/user/user.service';
@@ -8,11 +14,15 @@ import { LoginDTO } from './auth.dto';
 
 @Injectable()
 export class AuthService {
+  private googleClient: OAuth2Client;
+
   constructor(
     private readonly userService: UserService,
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
-  ) {}
+  ) {
+    this.googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+  }
 
   async validateGoogleUser(details: {
     email: string;
@@ -56,6 +66,31 @@ export class AuthService {
       };
     } catch {
       throw new Error('Usuário ou senha incorretos');
+    }
+  }
+
+  async verifyGoogleTokenAndSignIn(idToken: string): Promise<Partial<User>> {
+    try {
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken,
+        audience: process.env.GOOGLE_CLIENT_ID!,
+      });
+
+      const payload = ticket.getPayload();
+
+      if (!payload || !payload.email) {
+        throw new BadRequestException('Invalid Google token.');
+      }
+
+      const user = await this.validateGoogleUser({
+        email: payload.email,
+        name: payload.name!,
+        googleId: payload.sub,
+      });
+
+      return user;
+    } catch {
+      throw new UnauthorizedException('Google token verification failed');
     }
   }
 
