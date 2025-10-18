@@ -10,7 +10,10 @@ import { GoogleStrategy } from './google.strategy';
   imports: [
     UserModule,
     PassportModule,
-    JwtModule.register({ secret: process.env.TOKEN_SECRET! }),
+    JwtModule.register({
+      secret: process.env.TOKEN_SECRET!,
+      signOptions: { expiresIn: '720h' },
+    }),
   ],
   controllers: [AuthController],
   providers: [AuthService, GoogleStrategy],

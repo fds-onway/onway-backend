@@ -54,7 +54,7 @@ async function bootstrap() {
     tagGroups: [
       {
         name: 'Usuários e Gestão de Acesso',
-        tags: ['auth', 'users'],
+        tags: ['Autenticação', 'Usuários'],
       },
       {
         name: 'Utilitários',

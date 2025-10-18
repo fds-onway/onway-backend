@@ -6,7 +6,7 @@ import { UserExistsException } from './user.exceptions';
 import { UserService } from './user.service';
 
 @Controller('user')
-@ApiTags('users')
+@ApiTags('Usuários')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
