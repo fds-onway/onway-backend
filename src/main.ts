@@ -58,7 +58,7 @@ async function bootstrap() {
       },
       {
         name: 'Utilitários',
-        tags: ['utils', 'misc'],
+        tags: ['Utils', 'Miscelânia'],
       },
     ],
   };

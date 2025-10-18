@@ -1,13 +1,14 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiDetailsDto } from './api-details.dto';
 
 @Controller()
-@ApiTags('utils')
+@ApiTags('Miscelânia')
 export class AppController {
   constructor() {}
 
   @Get()
+  @ApiOperation({ summary: 'Pegar dados de uso da API' })
   @ApiResponse({
     status: 200,
     description:
