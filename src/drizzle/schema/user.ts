@@ -15,14 +15,14 @@ export const user = pgTable('user', {
   name: varchar({ length: 128 }).notNull(),
   email: varchar({ length: 256 }).notNull().unique(),
 
-  passwordHash: varchar({ length: 256 }),
+  passwordHash: varchar('password_hash', { length: 256 }),
   salt: varchar({ length: 16 }),
 
   provider: providerEnum().notNull().default('local'),
-  googleId: varchar({ length: 256 }).unique(),
+  googleId: varchar('google_id', { length: 256 }).unique(),
 
   role: roleEnum().notNull().default('user'),
-  createdAt: timestamp().notNull().defaultNow(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
 export type User = InferSelectModel<typeof user>;
