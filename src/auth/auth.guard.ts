@@ -13,6 +13,11 @@ type UserPayload = {
   id: number;
   name: string;
   email: string;
+  passwordHash: string | null;
+  salt: string | null;
+  provider: 'local' | 'google';
+  googleId: string | null;
+  createdAt: Date;
   role: UserRole;
 };
 
@@ -44,7 +49,7 @@ export class AuthGuard implements CanActivate {
     try {
       const payload = this.jwtService.verify<UserPayload>(token);
 
-      request.user = payload;
+      request.user = payload!;
     } catch {
       throw new BadRequestException('Invalid authorization token');
     }
