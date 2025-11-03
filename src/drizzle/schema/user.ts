@@ -1,5 +1,6 @@
 import { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import {
+  boolean,
   pgEnum,
   pgTable,
   serial,
@@ -20,6 +21,9 @@ export const user = pgTable('user', {
 
   provider: providerEnum().notNull().default('local'),
   googleId: varchar('google_id', { length: 256 }).unique(),
+
+  isVerified: boolean('is_verified').notNull().default(false),
+  verificationToken: varchar('verification_token', { length: 64 }).unique(),
 
   role: roleEnum().notNull().default('user'),
   createdAt: timestamp('created_at').notNull().defaultNow(),

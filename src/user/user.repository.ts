@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DrizzleQueryError, eq } from 'drizzle-orm';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
-import { NewUser, User, user as userModel } from 'src/drizzle/schema';
+import { NewUser, user, User, user as userModel } from 'src/drizzle/schema';
 import { UserExistsException } from './user.exceptions';
 
 @Injectable()
@@ -33,5 +33,31 @@ export default class UserRepository {
       .where(eq(userModel.email, email));
 
     return user;
+  }
+
+  async findByToken(token: string): Promise<User> {
+    const [user] = await this.drizzleService.db
+      .select()
+      .from(userModel)
+      .where(eq(userModel.verificationToken, token));
+
+    return user;
+  }
+
+  async verifyUser(userId: number): Promise<User> {
+    const [updatedUser] = await this.drizzleService.db
+      .update(userModel)
+      .set({
+        isVerified: true,
+        verificationToken: null,
+      })
+      .where(eq(userModel.id, userId))
+      .returning();
+
+    return updatedUser;
+  }
+
+  async deleteUser(userId: number): Promise<void> {
+    await this.drizzleService.db.delete(user).where(eq(user.id, userId));
   }
 }

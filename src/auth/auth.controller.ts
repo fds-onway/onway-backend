@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Query,
   Req,
   UnauthorizedException,
   UseGuards,
@@ -129,5 +130,26 @@ export class AuthController {
       tokenDto.idToken,
     );
     return this.authService.googleLogin(user as User);
+  }
+
+  @ApiOperation({
+    summary: 'Verificar o e-mail de um novo usuário',
+    description:
+      'Este endpoint é chamado pelo link enviado ao e-mail do usuário. Ele não deve ser chamado diretamente.',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description:
+      'E-mail verificado com sucesso. Retorna um token de acesso para login automático.',
+    type: SuccessfulLoginDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'O token fornecido é inválido ou já foi usado.',
+    type: ValidationErrorDTO,
+  })
+  @Get('verify-email')
+  async verifyEmail(@Query('token') token: string) {
+    return this.authService.confirmEmailVerification(token);
   }
 }

@@ -29,6 +29,20 @@
       "when": 1761261302518,
       "tag": "0003_round_living_tribunal",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1762028769331,
+      "tag": "0004_vengeful_bloodstrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1762028786950,
+      "tag": "0005_minor_power_man",
+      "breakpoints": true
     }
   ]
 }

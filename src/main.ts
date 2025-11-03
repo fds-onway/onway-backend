@@ -20,6 +20,8 @@ async function bootstrap() {
     'GOOGLE_CLIENT_ID',
     'GOOGLE_CLIENT_SECRET',
     'GOOGLE_CALLBACK_URL',
+    'EMAIL_USER_ACCESS_KEY_ID',
+    'EMAIL_USER_SECRET_ACCESS_KEY',
     'TOKEN_SECRET',
   ];
 

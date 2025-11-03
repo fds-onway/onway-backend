@@ -52,6 +52,12 @@ export class AuthService {
     try {
       const user = await this.userRepository.findByEmail(userDto.email);
 
+      if (user.provider === 'local' && !user.isVerified) {
+        throw new UnauthorizedException(
+          'Por favor, verifique seu e-mail antes de fazer login.',
+        );
+      }
+
       const requestPasswordHash = this.digest(
         `${user.salt}${userDto.password}`,
       );
@@ -64,7 +70,10 @@ export class AuthService {
       return {
         accessToken: this.jwtService.sign(payload),
       };
-    } catch {
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
       throw new Error('Usuário ou senha incorretos');
     }
   }
@@ -92,6 +101,20 @@ export class AuthService {
     } catch {
       throw new UnauthorizedException('Google token verification failed');
     }
+  }
+
+  async confirmEmailVerification(token: string) {
+    const user = await this.userRepository.findByToken(token);
+
+    if (!user) {
+      throw new BadRequestException(
+        'Token de verificação inválido ou expirado.',
+      );
+    }
+
+    await this.userRepository.verifyUser(user.id);
+
+    return {};
   }
 
   private digest(input: string): string {
