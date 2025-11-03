@@ -21,7 +21,7 @@ FROM ${image} AS deps
 
 COPY package*.json ./
 
-RUN HUSKY=0 npm ci --omit=dev
+RUN HUSKY=0 npm ci --omit=dev --ignore-scripts
 
 
 
