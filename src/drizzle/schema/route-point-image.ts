@@ -4,11 +4,12 @@ import routePoint from './route-point';
 
 const routePointImage = pgTable('route_point_image', {
   id: serial().primaryKey(),
+  filePath: varchar('file_path', { length: 512 }).notNull().unique(),
   imageUrl: varchar('image_url', { length: 512 }).notNull(),
   routePoint: integer('route_point')
     .notNull()
     .references(() => routePoint.id, {
-      onDelete: 'cascade',
+      onDelete: 'restrict',
       onUpdate: 'cascade',
     }),
 });

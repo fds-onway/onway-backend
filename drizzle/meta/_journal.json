@@ -43,6 +43,13 @@
       "when": 1762028786950,
       "tag": "0005_minor_power_man",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1762213533946,
+      "tag": "0006_ordinary_ravenous",
+      "breakpoints": true
     }
   ]
 }
