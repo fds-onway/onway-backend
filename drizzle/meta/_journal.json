@@ -50,6 +50,13 @@
       "when": 1762213533946,
       "tag": "0006_ordinary_ravenous",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1762217334175,
+      "tag": "0007_good_nomad",
+      "breakpoints": true
     }
   ]
 }

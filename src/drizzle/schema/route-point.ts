@@ -31,6 +31,8 @@ const routePoint = pgTable('route_point', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   type: routePointTypeEnum().notNull(),
   upvotes: integer().notNull().default(0),
+  latitude: text().notNull(),
+  longitude: text().notNull(),
 });
 
 export default routePoint;
