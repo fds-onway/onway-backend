@@ -43,8 +43,17 @@ export class AuthService {
 
   googleLogin(user: User) {
     const payload = { id: user.id, email: user.email, role: user.role };
+
+    const now = new Date();
+
+    const nowTimestamp = now.getTime();
+    const expirationDateTimestamp = nowTimestamp + 1000 * 2_592_000;
+
+    const expirationDate = new Date(expirationDateTimestamp);
+
     return {
       accessToken: this.jwtService.sign(payload),
+      expirationDate: expirationDate.toISOString(),
     };
   }
 
@@ -67,8 +76,17 @@ export class AuthService {
       }
 
       const payload = { id: user.id, email: user.email, role: user.role };
+
+      const now = new Date();
+
+      const nowTimestamp = now.getTime();
+      const expirationDateTimestamp = nowTimestamp + 1000 * 2_592_000;
+
+      const expirationDate = new Date(expirationDateTimestamp);
+
       return {
         accessToken: this.jwtService.sign(payload),
+        expirationDate: expirationDate.toISOString(),
       };
     } catch (error) {
       if (error instanceof UnauthorizedException) {

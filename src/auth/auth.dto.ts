@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString } from 'class-validator';
+import { IsEmail, IsISO8601, IsString } from 'class-validator';
 
 export class LoginDTO {
   @ApiProperty({
@@ -35,6 +35,13 @@ export class SuccessfulLoginDTO {
     description: 'O token JWT de login, possui duração de 1 mês',
   })
   accessToken: string;
+
+  @ApiProperty({
+    example: '2025-11-03T22:00:00:000Z',
+    description: 'A data e hora que o token irá expirar em formato ISO-8601',
+  })
+  @IsISO8601()
+  expirationDate: Date;
 }
 
 export class FailedLoginDTO {
