@@ -5,9 +5,17 @@ import { CdnModule } from './cdn/cdn.module';
 import { DrizzleModule } from './drizzle/drizzle.module';
 import { EmailModule } from './email/email.module';
 import { UserModule } from './user/user.module';
+import { RouteModule } from './route/route.module';
 
 @Module({
-  imports: [DrizzleModule, UserModule, AuthModule, EmailModule, CdnModule],
+  imports: [
+    DrizzleModule,
+    UserModule,
+    AuthModule,
+    EmailModule,
+    CdnModule,
+    RouteModule,
+  ],
   controllers: [AppController],
   providers: [],
 })

@@ -59,6 +59,10 @@ async function bootstrap() {
         tags: ['Autenticação', 'Usuários'],
       },
       {
+        name: 'Rotas, Pontos e Sugestão de Pontos',
+        tags: ['Rotas'],
+      },
+      {
         name: 'Utilitários',
         tags: ['Utils', 'Miscelânia'],
       },
