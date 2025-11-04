@@ -3,20 +3,27 @@ import {
   ExecutionContext,
   ForbiddenException,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
-import { RequestWithUser } from './auth.guard';
+import { JwtService } from '@nestjs/jwt';
+import { request } from 'express';
+import { User } from 'src/drizzle/schema';
+import { AuthGuard } from './auth.guard';
 
 @Injectable()
 export class IsAdminGuard implements CanActivate {
+  constructor(
+    private readonly authGuard: AuthGuard,
+    private readonly jwtService: JwtService,
+  ) {}
+
   canActivate(context: ExecutionContext): boolean {
-    const request: RequestWithUser = context.switchToHttp().getRequest();
+    this.authGuard.canActivate(context);
 
-    if (!request.user || request.user === undefined) {
-      throw new UnauthorizedException('User not defined.');
-    }
+    const [, token] = request.headers['authorization']!.split(' ');
 
-    if (request.user.role !== 'admin') {
+    const payload = this.jwtService.verify<Partial<User>>(token);
+
+    if (payload.role !== 'admin') {
       throw new ForbiddenException('User is not admin.');
     }
 

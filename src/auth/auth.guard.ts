@@ -7,30 +7,12 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
-type UserRole = 'admin' | 'user';
-
-type UserPayload = {
-  id: number;
-  name: string;
-  email: string;
-  passwordHash: string | null;
-  salt: string | null;
-  provider: 'local' | 'google';
-  googleId: string | null;
-  createdAt: Date;
-  role: UserRole;
-};
-
-export type RequestWithUser = {
-  user: UserPayload;
-} & Request;
-
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private readonly jwtService: JwtService) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const request: RequestWithUser = context.switchToHttp().getRequest();
+    const request: Request = context.switchToHttp().getRequest();
 
     const authorization = request.headers['authorization'];
     if (!authorization || authorization === undefined) {
@@ -47,9 +29,7 @@ export class AuthGuard implements CanActivate {
     if (!token) throw new BadRequestException('Token not found');
 
     try {
-      const payload = this.jwtService.verify<UserPayload>(token);
-
-      request.user = payload!;
+      this.jwtService.verify(token);
     } catch {
       throw new BadRequestException('Invalid authorization token');
     }
