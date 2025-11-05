@@ -5,7 +5,7 @@ import { NewUser, user, User, user as userModel } from 'src/drizzle/schema';
 import { UserExistsException } from './user.exceptions';
 
 @Injectable()
-export default class UserRepository {
+export class UserRepository {
   constructor(private readonly drizzleService: DrizzleService) {}
 
   async createUser(newUserDTO: NewUser): Promise<User> {

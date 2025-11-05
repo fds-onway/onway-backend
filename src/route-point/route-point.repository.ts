@@ -5,16 +5,16 @@ import { PgTransaction } from 'drizzle-orm/pg-core';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
 import * as schema from 'src/drizzle/schema';
 import {
-  NewRoute,
-  NewRouteTag,
-  route,
-  Route,
-  RouteTag,
-  routeTag,
+  NewRoutePoint,
+  NewRoutePointImage,
+  RoutePoint,
+  routePoint,
+  RoutePointImage,
+  routePointImage,
 } from 'src/drizzle/schema';
 
 @Injectable()
-export class RouteRepository {
+export class RoutePointRepository {
   constructor(private readonly drizzleService: DrizzleService) {}
 
   async createWithTransaction(
@@ -23,29 +23,29 @@ export class RouteRepository {
       typeof schema,
       ExtractTablesWithRelations<typeof schema>
     >,
-    values: NewRoute,
-  ): Promise<Route> {
-    const [createdRoute] = await transaction
-      .insert(route)
+    values: NewRoutePoint,
+  ): Promise<RoutePoint> {
+    const [createdRoutePoint] = await transaction
+      .insert(routePoint)
       .values(values)
       .returning();
 
-    return createdRoute;
+    return createdRoutePoint;
   }
 
-  async createTagWithTransaction(
+  async createRoutePointImageWithTransaction(
     transaction: PgTransaction<
       NodePgQueryResultHKT,
       typeof schema,
       ExtractTablesWithRelations<typeof schema>
     >,
-    values: NewRouteTag,
-  ): Promise<RouteTag> {
-    const [createdRouteTag] = await this.drizzleService.db
-      .insert(routeTag)
+    values: NewRoutePointImage,
+  ): Promise<RoutePointImage> {
+    const [createdRoutePointImage] = await transaction
+      .insert(routePointImage)
       .values(values)
       .returning();
 
-    return createdRouteTag;
+    return createdRoutePointImage;
   }
 }

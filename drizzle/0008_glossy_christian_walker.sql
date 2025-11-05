@@ -1,0 +1,1 @@
+ALTER TABLE "route_tag" ALTER COLUMN "tag" SET NOT NULL;

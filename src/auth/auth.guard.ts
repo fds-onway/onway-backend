@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
+import { User } from 'src/drizzle/schema';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -29,7 +30,9 @@ export class AuthGuard implements CanActivate {
     if (!token) throw new BadRequestException('Token not found');
 
     try {
-      this.jwtService.verify(token);
+      const user = this.jwtService.verify<Partial<User>>(token);
+
+      request.headers['user-id'] = user.id!.toString();
     } catch {
       throw new BadRequestException('Invalid authorization token');
     }

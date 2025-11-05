@@ -5,7 +5,7 @@ import { User } from 'src/drizzle/schema';
 import { EmailService } from 'src/email/email.service';
 import { RegisterUserDTO } from './user.dto';
 import { SendEmailException } from './user.exceptions';
-import UserRepository from './user.repository';
+import { UserRepository } from './user.repository';
 
 @Injectable()
 export class UserService {

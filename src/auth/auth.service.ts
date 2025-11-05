@@ -8,7 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { createHash } from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 import { User } from 'src/drizzle/schema';
-import UserRepository from 'src/user/user.repository';
+import { UserRepository } from 'src/user/user.repository';
 import { UserService } from 'src/user/user.service';
 import { LoginDTO } from './auth.dto';
 

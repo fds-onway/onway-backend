@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { request } from 'express';
+import { Request } from 'express';
 import { User } from 'src/drizzle/schema';
 import { AuthGuard } from './auth.guard';
 
@@ -18,6 +18,8 @@ export class IsAdminGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     this.authGuard.canActivate(context);
+
+    const request: Request = context.switchToHttp().getRequest();
 
     const [, token] = request.headers['authorization']!.split(' ');
 
