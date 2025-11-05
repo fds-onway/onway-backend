@@ -1,8 +1,20 @@
-import { Controller, Get, HttpStatus, Query, UseGuards } from '@nestjs/common';
+import {
+  ConflictException,
+  Controller,
+  Get,
+  HttpStatus,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { BadRequestErrorDTO, UnauthorizedErrorDTO } from 'src/error.dto';
+import {
+  BadRequestErrorDTO,
+  ConflictErrorDTO,
+  UnauthorizedErrorDTO,
+} from 'src/error.dto';
 import { SuccessfulPresignedURLDTO } from './cdn.dto';
+import { FileExistsException } from './cdn.exceptions';
 import { CDNDirectories, CdnService } from './cdn.service';
 import { FolderPipe } from './folder.pipe';
 
@@ -57,6 +69,11 @@ export class CdnController {
       'A request foi feita sem o header "authorization", ou o token utilizado expirou.',
     type: UnauthorizedErrorDTO,
   })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Um arquivo com este nome já existe',
+    type: ConflictErrorDTO,
+  })
   @Get('presigned-url')
   @UseGuards(AuthGuard)
   async presignedUrl(
@@ -64,12 +81,18 @@ export class CdnController {
     @Query('fileName') fileName: string,
     @Query('fileType') fileType: string,
   ) {
-    return {
-      url: await this.cdnService.getUploadPresignedURL(
-        folder,
-        fileName,
-        fileType,
-      ),
-    };
+    try {
+      return {
+        url: await this.cdnService.getUploadPresignedURL(
+          folder,
+          fileName,
+          fileType,
+        ),
+      };
+    } catch (error) {
+      if (error instanceof FileExistsException) {
+        throw new ConflictException(error.message);
+      }
+    }
   }
 }

@@ -1,11 +1,13 @@
 import {
   DeleteObjectCommand,
+  HeadObjectCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
 import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Injectable, Logger } from '@nestjs/common';
+import { FileExistsException } from './cdn.exceptions';
 
 export type CDNDirectories = 'routes' | 'points' | 'pointSuggestions';
 
@@ -35,15 +37,31 @@ export class CdnService {
     fileName: string,
     fileType: string,
   ): Promise<string> {
-    const command = new PutObjectCommand({
-      Bucket: this.bucketName,
-      Key: `${folder}/${fileName}`,
-      ContentType: fileType,
-    });
+    try {
+      const checkCommand = new HeadObjectCommand({
+        Bucket: this.bucketName,
+        Key: `${folder}/${fileName}`,
+      });
 
-    const url = await getSignedUrl(this.s3Client, command, { expiresIn: 300 });
+      await this.s3Client.send(checkCommand);
 
-    return url;
+      throw new FileExistsException('The file already exists');
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'NotFound') {
+        const command = new PutObjectCommand({
+          Bucket: this.bucketName,
+          Key: `${folder}/${fileName}`,
+          ContentType: fileType,
+        });
+
+        const url = await getSignedUrl(this.s3Client, command, {
+          expiresIn: 300,
+        });
+
+        return url;
+      }
+      throw error;
+    }
   }
 
   async deleteFile(folder: CDNDirectories, fileName: string): Promise<void> {
