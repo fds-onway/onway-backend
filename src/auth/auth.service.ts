@@ -15,6 +15,7 @@ import { LoginDTO } from './auth.dto';
 @Injectable()
 export class AuthService {
   private googleClient: OAuth2Client;
+  private readonly frontendUrl = process.env.API_BASE_URL!;
 
   constructor(
     private readonly userService: UserService,

@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Post,
   Query,
+  Redirect,
   Req,
   UnauthorizedException,
   UseGuards,
@@ -155,8 +156,9 @@ export class AuthController {
     type: ValidationErrorDTO,
   })
   @Get('verify-email')
+  @Redirect(`${process.env.WEBSITE_BASE_URL!}/login`, 301)
   async verifyEmail(@Query('token') token: string) {
-    return this.authService.confirmEmailVerification(token);
+    await this.authService.confirmEmailVerification(token);
   }
 
   @ApiOperation({
