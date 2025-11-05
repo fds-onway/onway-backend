@@ -7,7 +7,7 @@ import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Injectable, Logger } from '@nestjs/common';
 
-export type CDNDirectories = 'routes' | 'points' | 'pointSuggestion';
+export type CDNDirectories = 'routes' | 'points' | 'pointSuggestions';
 
 @Injectable()
 export class CdnService {

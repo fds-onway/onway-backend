@@ -63,6 +63,10 @@ async function bootstrap() {
         tags: ['Rotas'],
       },
       {
+        name: 'Imagens',
+        tags: ['Imagens'],
+      },
+      {
         name: 'Utilitários',
         tags: ['Utils', 'Miscelânia'],
       },

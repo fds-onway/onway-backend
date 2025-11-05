@@ -1,8 +1,8 @@
 import {
-  BadRequestException,
   CanActivate,
   ExecutionContext,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
@@ -17,7 +17,7 @@ export class AuthGuard implements CanActivate {
 
     const authorization = request.headers['authorization'];
     if (!authorization || authorization === undefined) {
-      throw new BadRequestException(
+      throw new UnauthorizedException(
         "Required header 'authorization' not found in request",
       );
     }
@@ -25,16 +25,16 @@ export class AuthGuard implements CanActivate {
     const [type, token] = authorization.split(' ');
 
     if (type !== 'Bearer')
-      throw new BadRequestException('Invalid type of authorization token');
+      throw new UnauthorizedException('Invalid type of authorization token');
 
-    if (!token) throw new BadRequestException('Token not found');
+    if (!token) throw new UnauthorizedException('Token not found');
 
     try {
       const user = this.jwtService.verify<Partial<User>>(token);
 
       request.headers['user-id'] = user.id!.toString();
     } catch {
-      throw new BadRequestException('Invalid authorization token');
+      throw new UnauthorizedException('Invalid authorization token');
     }
 
     return true;
