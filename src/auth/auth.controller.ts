@@ -4,29 +4,35 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  NotFoundException,
   Post,
   Query,
   Req,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { AuthGuard as PassportAuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { User } from 'src/drizzle/schema';
 import { ConflictErrorDTO, ValidationErrorDTO } from 'src/error.dto';
+import { UserService } from 'src/user/user.service';
 import {
   FailedLoginDTO,
   GoogleTokenDto,
   LoginDTO,
   SuccessfulLoginDTO,
 } from './auth.dto';
+import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
 @ApiTags('Autenticação')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService,
+  ) {}
 
   @ApiOperation({
     summary: 'Iniciar o fluxo de login com Google (Redirecionamento)',
@@ -36,7 +42,7 @@ export class AuthController {
     description: 'Redirecionamento para a página de login do Google.',
   })
   @Get('google')
-  @UseGuards(AuthGuard('google'))
+  @UseGuards(PassportAuthGuard('google'))
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async googleAuth(@Req() req) {}
 
@@ -61,7 +67,7 @@ export class AuthController {
     description: 'Falha na comunicação com o servidor do Google.',
   })
   @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
+  @UseGuards(PassportAuthGuard('google'))
   googleAuthRedirect(@Req() req: Request) {
     return this.authService.googleLogin(req.user as User);
   }
@@ -151,5 +157,33 @@ export class AuthController {
   @Get('verify-email')
   async verifyEmail(@Query('token') token: string) {
     return this.authService.confirmEmailVerification(token);
+  }
+
+  @ApiOperation({
+    summary: 'Retorna os dados do usuário autenticado',
+    description:
+      'Endpoint para obter informações do usuário logado (nome, e-mail, etc).',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Dados do usuário autenticado.',
+    // type: User, // Removido para evitar erro de tipo
+  })
+  @UseGuards(AuthGuard)
+  @Get('me')
+  async getMe(@Req() req: Request) {
+    const user = await this.userService.getUserById(
+      Number(req.headers['user-id']),
+    );
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    };
   }
 }

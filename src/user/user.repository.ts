@@ -26,6 +26,15 @@ export class UserRepository {
     return createdUser;
   }
 
+  async findById(userId: number): Promise<User> {
+    const [user] = await this.drizzleService.db
+      .select()
+      .from(userModel)
+      .where(eq(userModel.id, userId));
+
+    return user;
+  }
+
   async findByEmail(email: string): Promise<User> {
     const [user] = await this.drizzleService.db
       .select()
