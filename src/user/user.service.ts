@@ -74,4 +74,8 @@ export class UserService {
   private createVerificationToken(length: number = 32): string {
     return randomBytes(length).toString('hex');
   }
+
+  async getUserById(id: number): Promise<Partial<User>> {
+    return this.userRepository.findById(id);
+  }
 }
