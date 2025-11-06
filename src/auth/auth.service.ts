@@ -22,7 +22,7 @@ export class AuthService {
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
   ) {
-    this.googleClient = new OAuth2Client(process.env.GOOGLE_ANDROID_CLIENT_ID);
+    this.googleClient = new OAuth2Client();
   }
 
   async validateGoogleUser(details: {
@@ -101,7 +101,7 @@ export class AuthService {
     try {
       const ticket = await this.googleClient.verifyIdToken({
         idToken,
-        audience: process.env.GOOGLE_CLIENT_ID!,
+        audience: process.env.GOOGLE_ANDROID_CLIENT_ID!,
       });
 
       const payload = ticket.getPayload();
@@ -117,7 +117,8 @@ export class AuthService {
       });
 
       return user;
-    } catch {
+    } catch (error) {
+      console.log((error as Error).message);
       throw new UnauthorizedException('Google token verification failed');
     }
   }
