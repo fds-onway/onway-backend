@@ -24,6 +24,7 @@ export class GoogleTokenDto {
     description:
       'O ID Token JWT fornecido pelo SDK do Google Sign-In no cliente mobile',
   })
+  @IsString()
   idToken: string;
 }
 

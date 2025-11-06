@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   NotFoundException,
   Post,
   Query,
@@ -30,6 +31,7 @@ import { AuthService } from './auth.service';
 @Controller('auth')
 @ApiTags('Autenticação')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
@@ -133,7 +135,9 @@ export class AuthController {
   })
   @Post('google/token')
   async googleTokenSignIn(@Body() tokenDto: GoogleTokenDto) {
-    console.log(typeof tokenDto.idToken);
+    this.logger.error('Ó CHEGOU AQUI');
+    this.logger.error(`Body: ${JSON.stringify(tokenDto)}`);
+    this.logger.error(`TIPO DO NEGÓCIO ${typeof tokenDto.idToken}`);
     const user = await this.authService.verifyGoogleTokenAndSignIn(
       tokenDto.idToken,
     );
