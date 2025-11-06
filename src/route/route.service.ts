@@ -66,4 +66,6 @@ export class RouteService {
 
     return route;
   }
+
+  async search(query: string | null = null) {}
 }

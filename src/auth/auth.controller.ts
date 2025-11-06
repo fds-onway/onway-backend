@@ -133,6 +133,7 @@ export class AuthController {
   })
   @Post('google/token')
   async googleTokenSignIn(@Body() tokenDto: GoogleTokenDto) {
+    console.log(typeof tokenDto.idToken);
     const user = await this.authService.verifyGoogleTokenAndSignIn(
       tokenDto.idToken,
     );

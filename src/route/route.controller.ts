@@ -1,4 +1,12 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -16,5 +24,11 @@ export class RouteController {
   @UseGuards(AuthGuard, IsAdminGuard)
   async create(@Body() body: CreateRouteDTO, @Req() request: Request) {
     return await this.routeService.create(body, request);
+  }
+
+  @Get()
+  @UseGuards(AuthGuard)
+  async search(@Query('q') query: string | undefined) {
+    await this.routeService.search(query);
   }
 }
