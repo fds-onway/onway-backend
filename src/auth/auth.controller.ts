@@ -135,9 +135,6 @@ export class AuthController {
   })
   @Post('google/token')
   async googleTokenSignIn(@Body() tokenDto: GoogleTokenDto) {
-    this.logger.error('Ó CHEGOU AQUI');
-    this.logger.error(`Body: ${JSON.stringify(tokenDto)}`);
-    this.logger.error(`TIPO DO NEGÓCIO ${typeof tokenDto.idToken}`);
     const user = await this.authService.verifyGoogleTokenAndSignIn(
       tokenDto.idToken,
     );

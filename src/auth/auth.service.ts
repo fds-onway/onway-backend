@@ -22,7 +22,7 @@ export class AuthService {
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
   ) {
-    this.googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    this.googleClient = new OAuth2Client(process.env.GOOGLE_ANDROID_CLIENT_ID);
   }
 
   async validateGoogleUser(details: {
