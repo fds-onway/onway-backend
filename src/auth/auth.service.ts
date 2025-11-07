@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   BadRequestException,
   ConflictException,
@@ -13,7 +12,6 @@ import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 import { User } from 'src/drizzle/schema';
 import { UserRepository } from 'src/user/user.repository';
 import { UserService } from 'src/user/user.service';
-import * as serviceAccount from '../../firebase-admin-secret.json';
 import { LoginDTO } from './auth.dto';
 
 @Injectable()
@@ -27,10 +25,25 @@ export class AuthService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    if (!admin.apps.length) {
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount as any),
-      });
+    try {
+      const decodedKey = Buffer.from(
+        process.env.FIREBASE_ADMIN_SECRET_BASE64!,
+        'base64',
+      ).toString('utf-8');
+
+      if (!admin.apps.length) {
+        admin.initializeApp({
+          credential: admin.credential.cert(
+            JSON.parse(decodedKey) as admin.ServiceAccount,
+          ),
+        });
+      }
+    } catch (error) {
+      console.error(
+        'Falha ao carregar firebase-admin-key.json:',
+        (error as Error).message,
+      );
+      throw new Error('Não foi possível inicializar o Firebase Admin.');
     }
   }
 
