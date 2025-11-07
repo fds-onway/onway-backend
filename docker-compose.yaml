@@ -13,6 +13,8 @@ services:
   api:
     container_name: onway-api
     image: ${DOCKER_USERNAME}/onway-api:latest
+    volumes:
+      - "./firebase-admin-secret.json:/api/firebase-admin-secret.json"
     ports:
       - "3000:3000"
     env_file:

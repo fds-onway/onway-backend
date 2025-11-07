@@ -1,28 +1,37 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   BadRequestException,
   ConflictException,
   Injectable,
+  OnModuleInit,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { createHash } from 'crypto';
-import { OAuth2Client } from 'google-auth-library';
+import * as admin from 'firebase-admin';
+import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 import { User } from 'src/drizzle/schema';
 import { UserRepository } from 'src/user/user.repository';
 import { UserService } from 'src/user/user.service';
+import * as serviceAccount from '../../firebase-admin-secret.json';
 import { LoginDTO } from './auth.dto';
 
 @Injectable()
-export class AuthService {
-  private googleClient: OAuth2Client;
+export class AuthService implements OnModuleInit {
   private readonly frontendUrl = process.env.API_BASE_URL!;
 
   constructor(
     private readonly userService: UserService,
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
-  ) {
-    this.googleClient = new OAuth2Client();
+  ) {}
+
+  onModuleInit() {
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount as any),
+      });
+    }
   }
 
   async validateGoogleUser(details: {
@@ -99,27 +108,22 @@ export class AuthService {
 
   async verifyGoogleTokenAndSignIn(idToken: string): Promise<Partial<User>> {
     try {
-      const ticket = await this.googleClient.verifyIdToken({
-        idToken,
-        audience: process.env.GOOGLE_ANDROID_CLIENT_ID!,
-      });
-
-      const payload = ticket.getPayload();
+      const payload: DecodedIdToken = await admin.auth().verifyIdToken(idToken);
 
       if (!payload || !payload.email) {
-        throw new BadRequestException('Invalid Google token.');
+        throw new BadRequestException('Invalid Firebase token.');
       }
 
       const user = await this.validateGoogleUser({
         email: payload.email,
-        name: payload.name!,
+        name: (payload.name || 'Nome do Usuário Google') as string,
         googleId: payload.sub,
       });
 
       return user;
     } catch (error) {
       console.log((error as Error).message);
-      throw new UnauthorizedException('Google token verification failed');
+      throw new UnauthorizedException('Firebase token verification failed');
     }
   }
 
