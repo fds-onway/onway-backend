@@ -29,6 +29,16 @@ export class RouteService {
         },
       );
 
+      await Promise.all(
+        body.images.map((routeImg) => {
+          return this.routeRepository.createRouteImageWithTransaction(trx, {
+            route: createdRoute.id,
+            filePath: routeImg.fileName,
+            imageUrl: routeImg.imageUrl,
+          });
+        }),
+      );
+
       let seq = 0;
       for (const routePoint of body.points) {
         const { images: _, ...routePointToCreate } = routePoint;

@@ -6,6 +6,7 @@ import { DrizzleService } from 'src/drizzle/drizzle.service';
 import * as schema from 'src/drizzle/schema';
 import {
   NewRoute,
+  NewRouteImage,
   NewRouteTag,
   route,
   Route,
@@ -48,6 +49,22 @@ export class RouteRepository {
       .returning();
 
     return createdRouteTag;
+  }
+
+  async createRouteImageWithTransaction(
+    transaction: PgTransaction<
+      NodePgQueryResultHKT,
+      typeof schema,
+      ExtractTablesWithRelations<typeof schema>
+    >,
+    values: NewRouteImage,
+  ) {
+    const createdRouteImage = await transaction
+      .insert(routeImage)
+      .values(values)
+      .returning();
+
+    return createdRouteImage;
   }
 
   async getResumedRoutes() {
