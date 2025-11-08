@@ -264,7 +264,7 @@ class ResumedRouteDTO {
     example:
       'https://onway-cdn-bucket.s3.us-east-1.amazonaws.com/b2c3d4e5-2222-3333-4444-b00000000001.jpg',
     description:
-      'A URL da imagem principal da rota (ela tem outras, mas trás a "principal"',
+      'A URL da imagem principal da rota (ela tem outras, mas traz a "principal")',
     type: 'string',
   })
   image: string;
