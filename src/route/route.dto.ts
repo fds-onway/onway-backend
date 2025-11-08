@@ -190,4 +190,84 @@ class CreateRouteDTO {
   points: Array<PointDTO>;
 }
 
-export { CreateRouteDTO };
+class SucessfulCreatedRouteDTO {
+  @ApiProperty({
+    example: '1',
+    description: 'O ID Atribuído à rota.',
+  })
+  id: number;
+
+  @ApiProperty({
+    example: 'Caminhos de São João',
+    description: 'O nome dado a rota',
+  })
+  name: string;
+
+  @ApiProperty({
+    example:
+      'Os Caminhos de São João são rotas turísticas e de peregrinação que ligam cidades históricas do interior de Minas Gerais, celebrando a fé, a cultura e as tradições locais.',
+    description: 'A descrição dada a rota',
+  })
+  description: string;
+
+  @ApiProperty({
+    example: '2023-10-27T10:00:00.000Z',
+    type: 'string',
+    format: 'date-time',
+  })
+  createdAt: Date;
+
+  @ApiProperty({
+    example: '1',
+    description: 'ID do usuário que criou a rota.',
+  })
+  owner: number;
+
+  @ApiProperty({
+    example: '0',
+    description: 'Número de upvotes da rota (como acabou de ser criado, é 0)',
+  })
+  upvotes: number;
+}
+
+class ResumedRouteDTO {
+  @ApiProperty({
+    example: 1,
+    description: 'O ID da rota.',
+    type: 'integer',
+  })
+  id: number;
+
+  @ApiProperty({
+    example: 'Caminhos de São João',
+    description: 'O nome da rota',
+    type: 'string',
+  })
+  name: string;
+
+  @ApiProperty({
+    example:
+      'Os Caminhos de São João são rotas turísticas e de peregrinação que ligam cidades históricas do interior de Minas Gerais, celebrando a fé, a cultura e as tradições locais.',
+    description: 'A descrição da rota',
+    type: 'string',
+  })
+  description: string;
+
+  @ApiProperty({
+    example: ['Fé', 'Tradição', 'Cultura', 'Natureza', 'Comunidade'],
+    description: '',
+    type: 'array',
+  })
+  tags: Array<string>;
+
+  @ApiProperty({
+    example:
+      'https://onway-cdn-bucket.s3.us-east-1.amazonaws.com/b2c3d4e5-2222-3333-4444-b00000000001.jpg',
+    description:
+      'A URL da imagem principal da rota (ela tem outras, mas trás a "principal"',
+    type: 'string',
+  })
+  image: string;
+}
+
+export { CreateRouteDTO, ResumedRouteDTO, SucessfulCreatedRouteDTO };
