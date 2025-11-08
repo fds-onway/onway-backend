@@ -9,7 +9,13 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { DrizzleQueryError } from 'drizzle-orm';
 import { Request } from 'express';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -49,6 +55,7 @@ export class RouteController {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Algo deu errado na criação da rota.',
   })
+  @ApiBearerAuth()
   @Post()
   @UseGuards(IsAdminGuard)
   async create(@Body() body: CreateRouteDTO, @Req() request: Request) {
@@ -94,6 +101,7 @@ export class RouteController {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Algo deu ao pesquisar as rotas.',
   })
+  @ApiBearerAuth()
   @Get()
   async list(@Query('q') query: string | undefined) {
     return await this.routeService.search(query);

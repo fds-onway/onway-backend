@@ -6,7 +6,13 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import {
   BadRequestErrorDTO,
@@ -74,6 +80,7 @@ export class CdnController {
     description: 'Um arquivo com este nome já existe',
     type: ConflictErrorDTO,
   })
+  @ApiBearerAuth()
   @Get('presigned-url')
   @UseGuards(AuthGuard)
   async presignedUrl(
