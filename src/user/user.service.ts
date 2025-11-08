@@ -59,7 +59,7 @@ export class UserService {
       isVerified: true,
     });
 
-    const { passwordHash, salt, ...returningUser } = user;
+    const { passwordHash, salt, verificationToken, ...returningUser } = user;
     return returningUser as User;
   }
 
