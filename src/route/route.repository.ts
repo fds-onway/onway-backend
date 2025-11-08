@@ -67,7 +67,7 @@ export class RouteRepository {
     return createdRouteImage;
   }
 
-  async getResumedRoutes() {
+  async getResumedRoutes(limit: number = 16384) {
     const routes = await this.drizzleService.db
       .select({
         id: route.id,
@@ -78,7 +78,9 @@ export class RouteRepository {
       .from(route)
       .leftJoin(routeTag, eq(route.id, routeTag.route))
       .leftJoin(routeImage, eq(route.id, routeImage.route))
-      .groupBy(route.id, route.name, route.description);
+      .groupBy(route.id, route.name, route.description)
+      .orderBy(asc(route.name))
+      .limit(limit);
 
     return await Promise.all(
       routes.map(async (resumedRoute) => {

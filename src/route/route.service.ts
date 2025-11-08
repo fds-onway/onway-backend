@@ -96,6 +96,6 @@ export class RouteService {
 
       return results.map((result) => result.item);
     }
-    return null;
+    return await this.routeRepository.getResumedRoutes(15);
   }
 }
