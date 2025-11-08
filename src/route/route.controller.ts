@@ -145,7 +145,7 @@ export class RouteController {
   })
   @ApiResponse({
     status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: 'Algo deu ao deletar a rota.',
+    description: 'Algo deu errado ao deletar a rota.',
   })
   @ApiBearerAuth()
   @Delete(':id')
