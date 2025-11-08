@@ -2,8 +2,12 @@ import {
   Body,
   ConflictException,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   HttpStatus,
+  Param,
+  ParseIntPipe,
   Post,
   Query,
   Req,
@@ -12,6 +16,7 @@ import {
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiResponse,
   ApiTags,
@@ -20,7 +25,12 @@ import { DrizzleQueryError } from 'drizzle-orm';
 import { Request } from 'express';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { IsAdminGuard } from 'src/auth/is-admin.guard';
-import { ConflictErrorDTO } from 'src/error.dto';
+import {
+  BadRequestErrorDTO,
+  ConflictErrorDTO,
+  NotFoundErrorDTO,
+} from 'src/error.dto';
+import { RouteExistsPipe } from './route-exists.pipe';
 import {
   CreateRouteDTO,
   ResumedRouteDTO,
@@ -105,5 +115,42 @@ export class RouteController {
   @Get()
   async list(@Query('q') query: string | undefined) {
     return await this.routeService.search(query);
+  }
+
+  @ApiOperation({
+    summary: 'Deletar uma rota',
+    description:
+      'Rota para deletar rotas, também fazendo todo o processo de deletar todas as imagens, pontos, pontos de imagem e tags relacionadas à rota.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'O ID da rota que será deletada',
+    example: 29,
+    type: Number,
+  })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'A rota foi deletada com sucesso.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'O valor fornecido na URI não é um valor válido',
+    type: BadRequestErrorDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description:
+      'O id fornecido na URI não foi encontrada ou não existe mais no sistema.',
+    type: NotFoundErrorDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Algo deu ao deletar a rota.',
+  })
+  @ApiBearerAuth()
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async delete(@Param('id', ParseIntPipe, RouteExistsPipe) id: number) {
+    await this.routeService.delete(id);
   }
 }

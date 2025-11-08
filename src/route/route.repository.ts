@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { asc, eq, ExtractTablesWithRelations, sql } from 'drizzle-orm';
 import { NodePgQueryResultHKT } from 'drizzle-orm/node-postgres';
 import { PgTransaction } from 'drizzle-orm/pg-core';
+import { CdnService } from 'src/cdn/cdn.service';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
 import * as schema from 'src/drizzle/schema';
 import {
@@ -11,13 +12,28 @@ import {
   route,
   Route,
   routeImage,
+  routePoint,
   RouteTag,
   routeTag,
 } from 'src/drizzle/schema';
+import { RoutePointRepository } from 'src/route-point/route-point.repository';
 
 @Injectable()
 export class RouteRepository {
-  constructor(private readonly drizzleService: DrizzleService) {}
+  constructor(
+    private readonly drizzleService: DrizzleService,
+    private readonly routePointRepository: RoutePointRepository,
+    private readonly cdnService: CdnService,
+  ) {}
+
+  async getRouteById(id: number): Promise<Route> {
+    const [rt] = await this.drizzleService.db
+      .select()
+      .from(route)
+      .where(eq(route.id, id));
+
+    return rt;
+  }
 
   async createWithTransaction(
     transaction: PgTransaction<
@@ -95,5 +111,47 @@ export class RouteRepository {
         return { ...resumedRoute, image: image };
       }),
     );
+  }
+
+  async deleteRouteImage(id: number): Promise<void> {
+    const [rtImage] = await this.drizzleService.db
+      .select()
+      .from(routeImage)
+      .where(eq(routeImage.id, id));
+
+    await this.cdnService.deleteFile('routes', rtImage.filePath);
+
+    await this.drizzleService.db
+      .delete(routeImage)
+      .where(eq(routeImage.id, id));
+  }
+
+  async delete(id: number) {
+    const [dbRoute] = await this.drizzleService.db
+      .select({
+        id: route.id,
+        routeImageIdList: sql<
+          Array<number>
+        >`COALESCE(array_agg(DISTINCT ${routeImage.id}), '{}')`,
+        routePointIdList: sql<
+          Array<number>
+        >`COALESCE(array_agg(DISTINCT ${routePoint.id}), '{}')`,
+      })
+      .from(route)
+      .where(eq(route.id, id))
+      .leftJoin(routePoint, eq(routePoint.route, route.id))
+      .leftJoin(routeImage, eq(routeImage.route, route.id))
+      .groupBy(route.id);
+
+    await Promise.all([
+      ...dbRoute.routePointIdList.map((routePointId) =>
+        this.routePointRepository.deleteRoutePoint(routePointId),
+      ),
+      ...dbRoute.routeImageIdList.map((routeImageId) =>
+        this.deleteRouteImage(routeImageId),
+      ),
+    ]);
+
+    await this.drizzleService.db.delete(route).where(eq(route.id, id));
   }
 }

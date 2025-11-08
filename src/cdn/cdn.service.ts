@@ -72,6 +72,10 @@ export class CdnService {
       Key: filePath,
     });
 
-    await this.s3Client.send(deleteCommand);
+    try {
+      await this.s3Client.send(deleteCommand);
+    } catch {
+      // pass
+    }
   }
 }

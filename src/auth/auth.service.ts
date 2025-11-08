@@ -134,8 +134,7 @@ export class AuthService implements OnModuleInit {
       });
 
       return user;
-    } catch (error) {
-      console.log((error as Error).message);
+    } catch {
       throw new UnauthorizedException('Firebase token verification failed');
     }
   }

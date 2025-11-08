@@ -98,4 +98,8 @@ export class RouteService {
     }
     return await this.routeRepository.getResumedRoutes(15);
   }
+
+  async delete(id: number): Promise<void> {
+    await this.routeRepository.delete(id);
+  }
 }
