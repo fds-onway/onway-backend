@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
+import Fuse from 'fuse.js';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
 import { Route } from 'src/drizzle/schema';
 import { RoutePointRepository } from 'src/route-point/route-point.repository';
@@ -67,5 +68,24 @@ export class RouteService {
     return route;
   }
 
-  async search(query: string | null = null) {}
+  async search(query: string | null = null) {
+    if (query) {
+      const routes = await this.routeRepository.getResumedRoutes();
+
+      const fuse = new Fuse(routes, {
+        includeScore: false,
+        threshold: 0.5,
+        keys: [
+          { name: 'name', weight: 0.7 },
+          { name: 'tags', weight: 0.5 },
+          { name: 'description', weight: 0.3 },
+        ],
+      });
+
+      const results = fuse.search(query);
+
+      return results.map((result) => result.item);
+    }
+    return null;
+  }
 }

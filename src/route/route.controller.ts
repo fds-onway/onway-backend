@@ -29,6 +29,6 @@ export class RouteController {
   @Get()
   @UseGuards(AuthGuard)
   async search(@Query('q') query: string | undefined) {
-    await this.routeService.search(query);
+    return await this.routeService.search(query);
   }
 }

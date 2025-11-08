@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { eq, ExtractTablesWithRelations, sql } from 'drizzle-orm';
+import { asc, eq, ExtractTablesWithRelations, sql } from 'drizzle-orm';
 import { NodePgQueryResultHKT } from 'drizzle-orm/node-postgres';
 import { PgTransaction } from 'drizzle-orm/pg-core';
-import Fuse from 'fuse.js';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
 import * as schema from 'src/drizzle/schema';
 import {
@@ -10,6 +9,7 @@ import {
   NewRouteTag,
   route,
   Route,
+  routeImage,
   RouteTag,
   routeTag,
 } from 'src/drizzle/schema';
@@ -42,7 +42,7 @@ export class RouteRepository {
     >,
     values: NewRouteTag,
   ): Promise<RouteTag> {
-    const [createdRouteTag] = await this.drizzleService.db
+    const [createdRouteTag] = await transaction
       .insert(routeTag)
       .values(values)
       .returning();
@@ -50,30 +50,31 @@ export class RouteRepository {
     return createdRouteTag;
   }
 
-  async search(query: string) {
+  async getResumedRoutes() {
     const routes = await this.drizzleService.db
       .select({
         id: route.id,
         name: route.name,
         description: route.description,
-        tags: sql<Array<string>>`array_agg${routeTag.tag}`,
+        tags: sql<Array<string>>`array_agg(${routeTag.tag})`,
       })
       .from(route)
-      .innerJoin(schema.routeTag, eq(route.id, routeTag.route))
+      .leftJoin(routeTag, eq(route.id, routeTag.route))
+      .leftJoin(routeImage, eq(route.id, routeImage.route))
       .groupBy(route.id, route.name, route.description);
 
-    const fuse = new Fuse(routes, {
-      includeScore: true,
-      threshold: 0.5,
-      keys: [
-        { name: 'name', weight: 0.7 },
-        { name: 'tags', weight: 0.5 },
-        { name: 'description', weight: 0.3 },
-      ],
-    });
+    return await Promise.all(
+      routes.map(async (resumedRoute) => {
+        const [firstRouteImage] = await this.drizzleService.db
+          .select()
+          .from(routeImage)
+          .where(eq(routeImage.route, resumedRoute.id))
+          .orderBy(asc(routeImage.id))
+          .limit(1);
 
-    const results = fuse.search(query);
-
-    return results;
+        const image = firstRouteImage ? firstRouteImage.imageUrl : null;
+        return { ...resumedRoute, image: image };
+      }),
+    );
   }
 }
