@@ -85,4 +85,14 @@ export class UserRepository {
 
     await this.drizzleService.db.delete(user).where(eq(user.id, userId));
   }
+
+  async updateUser(id: number, values: Omit<Partial<User>, 'id'>) {
+    const [updatedUser] = await this.drizzleService.db
+      .update(user)
+      .set(values)
+      .where(eq(user.id, id))
+      .returning();
+
+    return updatedUser;
+  }
 }

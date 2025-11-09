@@ -10,18 +10,21 @@ import { createHash } from 'crypto';
 import * as admin from 'firebase-admin';
 import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 import { User } from 'src/drizzle/schema';
+import { EmailService } from 'src/email/email.service';
 import { UserRepository } from 'src/user/user.repository';
 import { UserService } from 'src/user/user.service';
 import { LoginDTO } from './auth.dto';
+import { InvalidTokenError, InvalidUserException } from './auth.exceptions';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
-  private readonly frontendUrl = process.env.API_BASE_URL!;
+  private readonly passwordTokenSecret = process.env.PASSWORD_RESET_TOKEN!;
 
   constructor(
     private readonly userService: UserService,
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
   ) {}
 
   onModuleInit() {
@@ -151,6 +154,53 @@ export class AuthService implements OnModuleInit {
     await this.userRepository.verifyUser(user.id);
 
     return {};
+  }
+
+  async sendPasswordResetEmail(email: string) {
+    const user = await this.userRepository.findByEmail(email);
+
+    if (!user || user.provider !== 'local') return;
+
+    const payload = { id: user.id, email: user.email };
+    const resetToken = this.jwtService.sign(payload, {
+      secret: this.passwordTokenSecret,
+      expiresIn: '10m',
+    });
+
+    await this.emailService.sendPasswordResetEmail(
+      user.email,
+      user.name,
+      resetToken,
+    );
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<User> {
+    let payload: { id: number; email: string };
+
+    try {
+      payload = this.jwtService.verify(token, {
+        secret: this.passwordTokenSecret,
+      });
+    } catch {
+      throw new InvalidTokenError('Token inválido ou expirado');
+    }
+
+    const user = await this.userRepository.findById(payload.id);
+
+    if (!user || user.provider !== 'local' || !user.salt)
+      throw new InvalidUserException('Usuário não encontrado ou inválido');
+
+    const newPasswordHash = this.digest(`${user.salt}${newPassword}`);
+
+    const updatedUser = await this.userRepository.updateUser(user.id, {
+      passwordHash: newPasswordHash,
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { passwordHash, salt, verificationToken, ...returningUser } =
+      updatedUser;
+
+    return returningUser as User;
   }
 
   private digest(input: string): string {
