@@ -35,6 +35,13 @@ export class RouteRepository {
     return rt;
   }
 
+  async getAllUserRoutes(userId: number): Promise<Array<Route>> {
+    return await this.drizzleService.db
+      .select()
+      .from(route)
+      .where(eq(route.owner, userId));
+  }
+
   async createWithTransaction(
     transaction: PgTransaction<
       NodePgQueryResultHKT,
