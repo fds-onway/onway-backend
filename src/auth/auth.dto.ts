@@ -132,6 +132,5 @@ export {
   LoginDTO,
   ResetPasswordDTO,
   ResetPasswordResponseDTO,
-  SuccessfulLoginDTO
+  SuccessfulLoginDTO,
 };
-
