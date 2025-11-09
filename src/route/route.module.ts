@@ -6,6 +6,7 @@ import { RoutePointModule } from 'src/route-point/route-point.module';
 import { RouteController } from './route.controller';
 import { RouteRepository } from './route.repository';
 import { RouteService } from './route.service';
+import { RouteUpvoteModule } from './route-upvote/route-upvote.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { RouteService } from './route.service';
     DrizzleModule,
     forwardRef(() => AuthModule),
     CdnModule,
+    RouteUpvoteModule,
   ],
   controllers: [RouteController],
   providers: [RouteService, RouteRepository],

@@ -23,6 +23,7 @@ import routeProgress, {
 } from './route-progress';
 import routeRating, { NewRouteRating, RouteRating } from './route-rating';
 import routeTag, { NewRouteTag, RouteTag } from './route-tag';
+import routeUpvote, { NewRouteUpvote, RouteUpvote } from './route-upvote';
 import { NewUser, roleEnum, user, User } from './user';
 
 export {
@@ -35,6 +36,7 @@ export {
   NewRouteProgress,
   NewRouteRating,
   NewRouteTag,
+  NewRouteUpvote,
   NewUser,
   roleEnum,
   route,
@@ -56,6 +58,9 @@ export {
   RouteRating,
   routeTag,
   RouteTag,
+  routeUpvote,
+  RouteUpvote,
   user,
-  User,
+  User
 };
+
