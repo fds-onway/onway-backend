@@ -19,7 +19,7 @@ import routePointSuggestion, {
 } from './route-point-suggestion';
 import routeProgress, {
   NewRouteProgress,
-  RouteProgress
+  RouteProgress,
 } from './route-progress';
 import routeRating, { NewRouteRating, RouteRating } from './route-rating';
 import routeTag, { NewRouteTag, RouteTag } from './route-tag';
@@ -57,6 +57,5 @@ export {
   routeTag,
   RouteTag,
   user,
-  User
+  User,
 };
-

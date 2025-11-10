@@ -13,7 +13,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { User } from 'src/drizzle/schema';
-import { ConflictErrorDTO, ValidationErrorDTO } from 'src/error.dto';
+import { ConflictErrorDTO, ValidationErrorDTO } from '../error.dto';
 import {
   FailedLoginDTO,
   GoogleTokenDto,

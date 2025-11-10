@@ -1,64 +1,109 @@
-import { BadRequestException, ExecutionContext } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { AuthGuard } from '../../src/auth/auth.guard';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Request } from 'express';
+import 'src/types/express';
+import { AuthController } from '../../src/auth/auth.controller';
+import { GoogleTokenDto, LoginDTO } from '../../src/auth/auth.dto';
+import { AuthService } from '../../src/auth/auth.service';
+describe('AuthController', () => {
+  let controller: AuthController;
+  let authService: AuthService;
+  let mockAuthService: ReturnType<typeof createMockAuthService>;
 
-describe('AuthGuard', () => {
-  let guard: AuthGuard;
-  let jwtService: JwtService;
+  const createMockAuthService = () => ({
+    googleLogin: jest.fn(),
+    login: jest.fn(),
+    verifyGoogleTokenAndSignIn: jest.fn(),
+  });
 
-  const mockRequest = {
-    headers: {},
+  const mockRequest: Partial<Request> = {
+    user: {
+      name: 'John',
+      id: 1,
+      email: 'john@example.com',
+      passwordHash: 'hash',
+      salt: 'salt',
+      providerEnum: 'local',
+      googleId: null,
+      role: 'user',
+      createAt: Date.now(),
+    },
   };
 
-  const mockContext = {
-    switchToHttp: () => ({
-      getRequest: () => mockRequest,
-    }),
-  } as unknown as ExecutionContext;
+  beforeEach(async () => {
+    mockAuthService = createMockAuthService();
 
-  beforeEach(() => {
-    jwtService = new JwtService({ secret: 'test-secret' });
-    guard = new AuthGuard(jwtService);
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [AuthController],
+      providers: [{ provide: AuthService, useValue: mockAuthService }],
+    }).compile();
+
+    controller = module.get<AuthController>(AuthController);
+    authService = module.get<AuthService>(AuthService);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
-  it('should throw an error if the Authorization header is missing', () => {
-    mockRequest.headers = {};
 
-    expect(() => guard.canActivate(mockContext)).toThrow(
-      new BadRequestException(
-        "Required header 'authorization' not found in request",
-      ),
-    );
-  });
+  describe('userAuth', () => {
+    it('should return a valid token if login is successful', async () => {
+      const dto: LoginDTO = { email: 'test@test.com', password: '123456' };
+      mockAuthService.login.mockResolvedValue('token');
 
-  it('should throw an error if the token type is not Bearer', () => {
-    mockRequest.headers = { authorization: 'Basic abcdef' };
+      const result = await controller.userAuth(dto);
 
-    expect(() => guard.canActivate(mockContext)).toThrow(
-      new BadRequestException('Invalid type of authorization token'),
-    );
-  });
-
-  it('should throw an error if the token is not provided', () => {
-    mockRequest.headers = { authorization: 'Bearer' };
-
-    expect(() => guard.canActivate(mockContext)).toThrow(
-      new BadRequestException('Token not found'),
-    );
-  });
-
-  it('should throw an error if the token is invalid', () => {
-    mockRequest.headers = { authorization: 'Bearer invalid.token' };
-
-    jest.spyOn(jwtService, 'verify').mockImplementation(() => {
-      throw new Error('Invalid token');
+      expect(authService.login).toHaveBeenCalledWith(dto);
+      expect(result).toBe('token');
     });
 
-    expect(() => guard.canActivate(mockContext)).toThrow(
-      new BadRequestException('Invalid authorization token'),
-    );
+    it('should throw UnauthorizedException when login fails', async () => {
+      const dto: LoginDTO = { email: 'test@test.com', password: 'wrong' };
+      mockAuthService.login.mockRejectedValue(new Error('fail'));
+
+      await expect(controller.userAuth(dto)).rejects.toThrow(
+        new UnauthorizedException('Usuário ou senha incorretos'),
+      );
+    });
+  });
+
+  describe('googleTokenSignIn', () => {
+    it('should verify token and return login response', async () => {
+      const dto: GoogleTokenDto = { idToken: 'valid_token' };
+      mockAuthService.verifyGoogleTokenAndSignIn.mockResolvedValue(
+        mockRequest.user,
+      );
+      mockAuthService.googleLogin.mockReturnValue('token');
+
+      const result = await controller.googleTokenSignIn(dto);
+
+      expect(authService.verifyGoogleTokenAndSignIn).toHaveBeenCalledWith(
+        'valid_token',
+      );
+      expect(authService.googleLogin).toHaveBeenCalledWith(mockRequest.user);
+      expect(result).toBe('token');
+    });
+  });
+
+  describe('googleAuthRedirect', () => {
+    it('should throw ConflictException when email already exists with local provider', () => {
+      const conflictMessage =
+        'Usuário com esse e-mail já existe, por favor faça login com sua senha.';
+
+      // Configura o mock para lançar a exceção esperada
+      mockAuthService.googleLogin.mockImplementation(() => {
+        throw new ConflictException(conflictMessage);
+      });
+
+      try {
+        controller.googleAuthRedirect(mockRequest as Request);
+
+        // Se chegou aqui, é porque NÃO lançou exceção — falha o teste explicitamente
+        fail('Deveria ter lançado ConflictException');
+      } catch (error) {
+        expect(error).toBeInstanceOf(ConflictException);
+        expect((error as ConflictException).message).toBe(conflictMessage);
+      }
+    });
   });
 });
