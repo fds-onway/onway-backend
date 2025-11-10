@@ -2,30 +2,50 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
+  Logger,
+  NotFoundException,
   Post,
+  Query,
+  Redirect,
   Req,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { AuthGuard as PassportAuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { User } from 'src/drizzle/schema';
-import { ConflictErrorDTO, ValidationErrorDTO } from '../error.dto';
+import { UserService } from 'src/user/user.service';
+import {
+  ConflictErrorDTO,
+  UnauthorizedErrorDTO,
+  ValidationErrorDTO,
+} from '../error.dto';
 import {
   FailedLoginDTO,
+  ForgotPasswordDTO,
+  ForgotPasswordResponseDTO,
   GoogleTokenDto,
   LoginDTO,
+  ResetPasswordDTO,
+  ResetPasswordResponseDTO,
   SuccessfulLoginDTO,
 } from './auth.dto';
+import { InvalidTokenError, InvalidUserException } from './auth.exceptions';
+import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
 @ApiTags('Autenticação')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  private readonly logger = new Logger(AuthController.name);
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService,
+  ) {}
 
   @ApiOperation({
     summary: 'Iniciar o fluxo de login com Google (Redirecionamento)',
@@ -35,7 +55,7 @@ export class AuthController {
     description: 'Redirecionamento para a página de login do Google.',
   })
   @Get('google')
-  @UseGuards(AuthGuard('google'))
+  @UseGuards(PassportAuthGuard('google'))
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async googleAuth(@Req() req) {}
 
@@ -60,7 +80,7 @@ export class AuthController {
     description: 'Falha na comunicação com o servidor do Google.',
   })
   @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
+  @UseGuards(PassportAuthGuard('google'))
   googleAuthRedirect(@Req() req: Request) {
     return this.authService.googleLogin(req.user as User);
   }
@@ -129,5 +149,113 @@ export class AuthController {
       tokenDto.idToken,
     );
     return this.authService.googleLogin(user as User);
+  }
+
+  @ApiOperation({
+    summary: 'Verificar o e-mail de um novo usuário',
+    description:
+      'Este endpoint é chamado pelo link enviado ao e-mail do usuário. Ele não deve ser chamado diretamente.',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description:
+      'E-mail verificado com sucesso. Retorna um token de acesso para login automático.',
+    type: SuccessfulLoginDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'O token fornecido é inválido ou já foi usado.',
+    type: ValidationErrorDTO,
+  })
+  @Get('verify-email')
+  @Redirect(`${process.env.WEBSITE_BASE_URL!}/login`, 301)
+  async verifyEmail(@Query('token') token: string) {
+    await this.authService.confirmEmailVerification(token);
+  }
+
+  @ApiOperation({
+    summary: 'Retorna os dados do usuário autenticado',
+    description:
+      'Endpoint para obter informações do usuário logado (nome, e-mail, etc).',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Dados do usuário autenticado.',
+  })
+  @UseGuards(AuthGuard)
+  @Get('me')
+  async getMe(@Headers('user-id') userId: number) {
+    const user = await this.userService.getUserById(userId);
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    };
+  }
+
+  @ApiOperation({
+    summary: 'Iniciar o processo de redefinição de senha',
+    description:
+      'Esta é a primeira rota. O usuário envia o e-mail e o backend dispara o envio do link de redefinição.',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description:
+      'Solicitação recebida. Por razões de segurança, a resposta será sempre OK (200), mesmo que o e-mail não exista, para evitar a enumeração de usuários.',
+    type: ForgotPasswordResponseDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'O e-mail fornecido tem um formato inválido.',
+    type: ValidationErrorDTO,
+  })
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body() body: ForgotPasswordDTO) {
+    await this.authService.sendPasswordResetEmail(body.email);
+    return {
+      message:
+        'Se um usuário com este e-mail estiver cadastrado, um link de redefinição será enviado.',
+    };
+  }
+
+  @ApiOperation({
+    summary: 'Efetivar a redefinição de senha',
+    description:
+      'Esta é a segunda rota. O frontend envia o token (recebido do link no e-mail) e a nova senha para finalizar o processo.',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Senha redefinida com sucesso.',
+    type: ResetPasswordResponseDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'O token é inválido, expirou ou o usuário não foi encontrado.',
+    type: UnauthorizedErrorDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description:
+      'Os dados enviados são inválidos (ex: token não é JWT, senha é muito curta).',
+    type: ValidationErrorDTO,
+  })
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() body: ResetPasswordDTO) {
+    try {
+      await this.authService.resetPassword(body.token, body.password);
+      return { message: 'Senha redefinida com sucesso.' };
+    } catch (error) {
+      if (error instanceof InvalidTokenError)
+        throw new UnauthorizedException('Token inválido ou expirado');
+      if (error instanceof InvalidUserException)
+        throw new UnauthorizedException('Usuário não encontrado ou inválido');
+    }
   }
 }

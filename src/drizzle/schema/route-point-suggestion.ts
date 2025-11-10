@@ -11,6 +11,7 @@ const routePointSuggestion = pgTable('route_point_suggestion', {
   sequence: integer().notNull(),
   name: varchar({ length: 127 }).notNull(),
   imageUrl: varchar('image_url', { length: 512 }).notNull(),
+  imageFilePath: varchar('image_file_path', { length: 512 }).notNull().unique(),
   description: text().notNull(),
   reason: varchar({ length: 512 }).notNull(),
   user: integer()

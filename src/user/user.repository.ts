@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { DrizzleQueryError, eq } from 'drizzle-orm';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
-import { NewUser, User, user as userModel } from 'src/drizzle/schema';
+import { NewUser, user, User, user as userModel } from 'src/drizzle/schema';
+import { RouteRepository } from 'src/route/route.repository';
 import { UserExistsException } from './user.exceptions';
 
 @Injectable()
-export default class UserRepository {
-  constructor(private readonly drizzleService: DrizzleService) {}
+export class UserRepository {
+  constructor(
+    private readonly drizzleService: DrizzleService,
+    private readonly routeRepository: RouteRepository,
+  ) {}
 
   async createUser(newUserDTO: NewUser): Promise<User> {
     let createdUser: User;
@@ -26,6 +30,15 @@ export default class UserRepository {
     return createdUser;
   }
 
+  async findById(userId: number): Promise<User> {
+    const [user] = await this.drizzleService.db
+      .select()
+      .from(userModel)
+      .where(eq(userModel.id, userId));
+
+    return user;
+  }
+
   async findByEmail(email: string): Promise<User> {
     const [user] = await this.drizzleService.db
       .select()
@@ -33,5 +46,53 @@ export default class UserRepository {
       .where(eq(userModel.email, email));
 
     return user;
+  }
+
+  async findByToken(token: string): Promise<User> {
+    const [user] = await this.drizzleService.db
+      .select()
+      .from(userModel)
+      .where(eq(userModel.verificationToken, token));
+
+    return user;
+  }
+
+  async verifyUser(userId: number): Promise<User> {
+    const [updatedUser] = await this.drizzleService.db
+      .update(userModel)
+      .set({
+        isVerified: true,
+        verificationToken: null,
+      })
+      .where(eq(userModel.id, userId))
+      .returning();
+
+    return updatedUser;
+  }
+
+  async deleteUser(userId: number): Promise<void> {
+    const usr = await this.findById(userId);
+
+    if (usr.role === 'admin') {
+      const userRoutes = await this.routeRepository.getAllUserRoutes(usr.id);
+
+      if (userRoutes.length === 0) {
+        await Promise.all(
+          userRoutes.map((route) => this.routeRepository.delete(route.id)),
+        );
+      }
+    }
+
+    await this.drizzleService.db.delete(user).where(eq(user.id, userId));
+  }
+
+  async updateUser(id: number, values: Omit<Partial<User>, 'id'>) {
+    const [updatedUser] = await this.drizzleService.db
+      .update(user)
+      .set(values)
+      .where(eq(user.id, id))
+      .returning();
+
+    return updatedUser;
   }
 }

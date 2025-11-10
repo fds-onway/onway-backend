@@ -20,6 +20,8 @@ async function bootstrap() {
     'GOOGLE_CLIENT_ID',
     'GOOGLE_CLIENT_SECRET',
     'GOOGLE_CALLBACK_URL',
+    'EMAIL_USER_ACCESS_KEY_ID',
+    'EMAIL_USER_SECRET_ACCESS_KEY',
     'TOKEN_SECRET',
   ];
 
@@ -30,6 +32,8 @@ async function bootstrap() {
   }
 
   const app = await NestFactory.create(AppModule);
+
+  app.enableCors();
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -55,6 +59,14 @@ async function bootstrap() {
       {
         name: 'Usuários e Gestão de Acesso',
         tags: ['Autenticação', 'Usuários'],
+      },
+      {
+        name: 'Rotas, Pontos e Sugestão de Pontos',
+        tags: ['Rotas'],
+      },
+      {
+        name: 'Imagens',
+        tags: ['Imagens'],
       },
       {
         name: 'Utilitários',

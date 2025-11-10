@@ -29,6 +29,41 @@
       "when": 1761261302518,
       "tag": "0003_round_living_tribunal",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1762028769331,
+      "tag": "0004_vengeful_bloodstrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1762028786950,
+      "tag": "0005_minor_power_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1762213533946,
+      "tag": "0006_ordinary_ravenous",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1762217334175,
+      "tag": "0007_good_nomad",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1762292497561,
+      "tag": "0008_glossy_christian_walker",
+      "breakpoints": true
     }
   ]
 }

@@ -1,40 +1,23 @@
 import {
-  BadRequestException,
   CanActivate,
   ExecutionContext,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-
-type UserRole = 'admin' | 'user';
-
-type UserPayload = {
-  id: number;
-  name: string;
-  email: string;
-  passwordHash: string | null;
-  salt: string | null;
-  provider: 'local' | 'google';
-  googleId: string | null;
-  createdAt: Date;
-  role: UserRole;
-};
-
-export type RequestWithUser = {
-  user: UserPayload;
-} & Request;
+import { User } from 'src/drizzle/schema';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private readonly jwtService: JwtService) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const request: RequestWithUser = context.switchToHttp().getRequest();
+    const request: Request = context.switchToHttp().getRequest();
 
     const authorization = request.headers['authorization'];
     if (!authorization || authorization === undefined) {
-      throw new BadRequestException(
+      throw new UnauthorizedException(
         "Required header 'authorization' not found in request",
       );
     }
@@ -42,16 +25,16 @@ export class AuthGuard implements CanActivate {
     const [type, token] = authorization.split(' ');
 
     if (type !== 'Bearer')
-      throw new BadRequestException('Invalid type of authorization token');
+      throw new UnauthorizedException('Invalid type of authorization token');
 
-    if (!token) throw new BadRequestException('Token not found');
+    if (!token) throw new UnauthorizedException('Token not found');
 
     try {
-      const payload = this.jwtService.verify<UserPayload>(token);
+      const user = this.jwtService.verify<Partial<User>>(token);
 
-      request.user = payload!;
+      request.headers['user-id'] = user.id!.toString();
     } catch {
-      throw new BadRequestException('Invalid authorization token');
+      throw new UnauthorizedException('Invalid authorization token');
     }
 
     return true;

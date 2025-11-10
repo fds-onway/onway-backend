@@ -8,3 +8,14 @@ export class UserExistsException extends Error {
     }
   }
 }
+
+export class SendEmailException extends Error {
+  constructor(message: string = '') {
+    super(message);
+    this.name = 'SendEmailException';
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, SendEmailException);
+    }
+  }
+}
