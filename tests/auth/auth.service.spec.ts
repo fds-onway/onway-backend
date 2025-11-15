@@ -18,11 +18,9 @@ import {
 import { createHash } from 'crypto';
 
 jest.mock('firebase-admin', () => ({
-  initializeApp: jest.fn(),
-  auth: () => ({
+  auth: jest.fn().mockReturnValue({
     verifyIdToken: jest.fn(),
   }),
-  apps: [],
 }));
 
 describe('AuthService', () => {
@@ -104,6 +102,7 @@ describe('AuthService', () => {
     });
 
     it('should create a new user if not found', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null as any);
       jest.spyOn(userService, 'createFromGoogle').mockResolvedValue({} as User);
       await service.validateGoogleUser({
@@ -174,13 +173,13 @@ describe('AuthService', () => {
   });
 
   describe('verifyGoogleTokenAndSignIn', () => {
-    // it('should return a user for a valid token', async () => {
-    //   const payload = { email: 'test@test.com', sub: '123', name: 'Test' };
-    //   (admin.auth().verifyIdToken as jest.Mock).mockResolvedValue(payload);
-    //   jest.spyOn(service, 'validateGoogleUser').mockResolvedValue({} as User);
-    //   const result = await service.verifyGoogleTokenAndSignIn('valid-token');
-    //   expect(result).toBeDefined();
-    // });
+    it('should return a user for a valid token', async () => {
+      const payload = { email: 'test@test.com', sub: '123', name: 'Test' };
+      (admin.auth().verifyIdToken as jest.Mock).mockResolvedValue(payload);
+      jest.spyOn(service, 'validateGoogleUser').mockResolvedValue({} as User);
+      const result = await service.verifyGoogleTokenAndSignIn('valid-token');
+      expect(result).toBeDefined();
+    });
 
     it('should throw UnauthorizedException for invalid token payload', async () => {
       (admin.auth().verifyIdToken as jest.Mock).mockResolvedValue({
@@ -202,6 +201,7 @@ describe('AuthService', () => {
     });
 
     it('should throw BadRequestException for invalid token', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       jest.spyOn(userRepository, 'findByToken').mockResolvedValue(null as any);
       await expect(
         service.confirmEmailVerification('invalid-token'),
