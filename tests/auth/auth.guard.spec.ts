@@ -61,4 +61,17 @@ describe('AuthGuard', () => {
       new BadRequestException('Invalid authorization token'),
     );
   });
+
+  it('should return true and attach userId to headers for a valid token', () => {
+    const token = 'valid-jwt-token';
+    const decodedPayload = { id: 123, email: 'test@example.com' };
+    mockRequest.headers = { authorization: `Bearer ${token}` };
+
+    jest.spyOn(jwtService, 'verify').mockReturnValue(decodedPayload);
+
+    const canActivate = guard.canActivate(mockContext);
+
+    expect(canActivate).toBe(true);
+    expect(mockRequest.headers['user-id']).toBe(decodedPayload.id.toString());
+  });
 });
