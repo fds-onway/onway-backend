@@ -99,6 +99,16 @@ export class RouteService {
     return await this.routeRepository.getResumedRoutes(15);
   }
 
+  async describe(id: number) {
+    const route = await this.routeRepository.getDetailedRouteById(id);
+
+    route['points'] = await this.routePointRepository.getAllPointsInOneRoute(
+      route.id,
+    );
+
+    return route;
+  }
+
   async delete(id: number): Promise<void> {
     await this.routeRepository.delete(id);
   }

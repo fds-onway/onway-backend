@@ -12,7 +12,9 @@ import {
   routePoint,
   RoutePointImage,
   routePointImage,
+  routePointUpvote,
 } from 'src/drizzle/schema';
+import { RoutePointDTO } from './route-point.dto';
 
 @Injectable()
 export class RoutePointRepository {
@@ -20,6 +22,49 @@ export class RoutePointRepository {
     private readonly drizzleService: DrizzleService,
     private readonly cdnService: CdnService,
   ) {}
+
+  async getById(id: number): Promise<RoutePoint> {
+    const [rtPoint] = await this.drizzleService.db
+      .select()
+      .from(routePoint)
+      .where(eq(routePoint.id, id));
+    return rtPoint;
+  }
+
+  async getAllPointsInOneRoute(routeId: number): Promise<Array<RoutePointDTO>> {
+    const routePoints = await this.drizzleService.db
+      .select({
+        id: routePoint.id,
+        name: routePoint.name,
+        description: routePoint.description,
+        type: routePoint.type,
+        upvotes: sql<number>`(
+            SELECT COALESCE(SUM(${routePointUpvote.vote}), 0)
+            FROM ${routePointUpvote}
+            WHERE ${routePointUpvote.routePoint} = ${routePoint.id}
+          )`.mapWith(Number),
+        latitude: routePoint.latitude,
+        longitude: routePoint.longitude,
+        sequence: routePoint.sequence,
+        images: sql<
+          Array<string>
+        >`COALESCE(array_agg(DISTINCT ${routePointImage.imageUrl}) FILTER (WHERE ${routePointImage.imageUrl} IS NOT NULL), '{}')`,
+      })
+      .from(routePoint)
+      .leftJoin(routePointImage, eq(routePointImage.routePoint, routePoint.id))
+      .where(eq(routePoint.route, routeId))
+      .groupBy(
+        routePoint.id,
+        routePoint.name,
+        routePoint.description,
+        routePoint.type,
+        routePoint.latitude,
+        routePoint.longitude,
+      )
+      .orderBy(routePoint.sequence);
+
+    return routePoints;
+  }
 
   async createWithTransaction(
     transaction: PgTransaction<

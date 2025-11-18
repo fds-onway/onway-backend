@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayNotEmpty,
@@ -270,4 +270,147 @@ class ResumedRouteDTO {
   image: string;
 }
 
-export { CreateRouteDTO, ResumedRouteDTO, SucessfulCreatedRouteDTO };
+class FullRoutePointDTO {
+  @ApiProperty({
+    example: 7,
+    description: 'O ID único do ponto da rota.',
+  })
+  id: number;
+
+  @ApiProperty({
+    example: 'Cachoeira do Poção',
+    description: 'O nome do ponto.',
+  })
+  name: string;
+
+  @ApiProperty({
+    example:
+      'A primeira cachoeira da trilha, ideal para banho, com um grande poço de águas claras e acesso facilitado.',
+    description: 'A descrição detalhada do ponto.',
+  })
+  description: string;
+
+  @ApiProperty({
+    example: 'natureza',
+    description: 'A categoria do ponto.',
+    enum: [
+      'restaurante',
+      'parque',
+      'natureza',
+      'servico',
+      'hotel',
+      'entretenimento',
+      'miscelania',
+    ],
+  })
+  type: string;
+
+  @ApiProperty({
+    example: 15,
+    description: 'A quantidade de votos (upvotes - downvotes) deste ponto.',
+  })
+  upvotes: number;
+
+  @ApiProperty({
+    example: '-23.456789',
+    description: 'Latitude do ponto.',
+  })
+  latitude: string;
+
+  @ApiProperty({
+    example: '-45.123456',
+    description: 'Longitude do ponto.',
+  })
+  longitude: string;
+
+  @ApiProperty({
+    example: 0,
+    description: 'A ordem sequencial deste ponto na rota (começando em 0).',
+  })
+  sequence: number;
+
+  @ApiProperty({
+    example: [
+      'https://onway-cdn-bucket.s3.us-east-1.amazonaws.com/p1a2b3c4.jpg',
+    ],
+    description: 'Lista de URLs das imagens deste ponto.',
+    type: [String],
+  })
+  images: string[];
+}
+
+class FullRouteDTO {
+  @ApiProperty({
+    example: 3,
+    description: 'O ID único da rota.',
+  })
+  id: number;
+
+  @ApiProperty({
+    example: 'Trilha das Sete Cachoeiras',
+    description: 'O nome da rota.',
+  })
+  name: string;
+
+  @ApiProperty({
+    example:
+      "Uma rota de aventura e ecoturismo que passa por sete quedas d'água deslumbrantes na Serra do Mar.",
+    description: 'A descrição completa da rota.',
+  })
+  description: string;
+
+  @ApiProperty({
+    example: ['aventura', 'cachoeira', 'natureza', 'trekking'],
+    description: 'Lista de tags associadas à rota.',
+    type: [String],
+  })
+  tags: string[];
+
+  @ApiProperty({
+    example: 120,
+    description: 'A quantidade total de upvotes da rota.',
+  })
+  upvotes: number;
+
+  @ApiProperty({
+    example: 13,
+    description: 'O ID do usuário criador (dono) da rota.',
+  })
+  ownerId: number;
+
+  @ApiProperty({
+    example: 'Matheus Augusto',
+    description: 'O nome do usuário criador da rota.',
+  })
+  ownerName: string;
+
+  @ApiProperty({
+    example: [
+      'https://onway-cdn-bucket.s3.us-east-1.amazonaws.com/rota-cover.jpg',
+    ],
+    description: 'Lista de URLs das imagens principais da rota.',
+    type: [String],
+  })
+  images: string[];
+
+  @ApiProperty({
+    type: () => FullRoutePointDTO,
+    isArray: true,
+    description: 'Lista ordenada de todos os pontos que compõem esta rota.',
+  })
+  @Type(() => FullRoutePointDTO)
+  points: FullRoutePointDTO[];
+}
+
+class UpdateRouteDTO extends PartialType(
+  OmitType(CreateRouteDTO, ['points'] as const),
+) {}
+
+export {
+  CreateRouteDTO,
+  FullRouteDTO,
+  ResumedRouteDTO,
+  SucessfulCreatedRouteDTO,
+  UpdateRouteDTO
+};
+

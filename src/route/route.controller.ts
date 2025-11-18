@@ -33,6 +33,7 @@ import {
 import { RouteExistsPipe } from './route-exists.pipe';
 import {
   CreateRouteDTO,
+  FullRouteDTO,
   ResumedRouteDTO,
   SucessfulCreatedRouteDTO,
 } from './route.dto';
@@ -109,12 +110,43 @@ export class RouteController {
   })
   @ApiResponse({
     status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: 'Algo deu ao pesquisar as rotas.',
+    description: 'Algo deu errado ao pesquisar as rotas.',
   })
   @ApiBearerAuth()
   @Get()
   async list(@Query('q') query: string | undefined) {
     return await this.routeService.search(query);
+  }
+
+  @ApiOperation({
+    summary: 'Trazer detalhes de uma rota específica',
+    description:
+      'Rota para trazer detalhes a mais de uma rota como um todo, como todos os pontos, todas as imagens, etc',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'A rota foi consultada com sucesso.',
+    type: FullRouteDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'O valor fornecido na URI não é um valor válido',
+    type: BadRequestErrorDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description:
+      'O id fornecido na URI não foi encontrado ou não existe mais no sistema.',
+    type: NotFoundErrorDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Algo deu errado ao pesquisar a rota.',
+  })
+  @ApiBearerAuth()
+  @Get(':id')
+  async describe(@Param('id', ParseIntPipe, RouteExistsPipe) routeId: number) {
+    return await this.routeService.describe(routeId);
   }
 
   @ApiOperation({

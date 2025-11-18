@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsIn, IsInt } from 'class-validator';
 
-class RouteUpvoteDTO {
+class RoutePointUpvoteDTO {
   @ApiProperty({
     description:
       'O valor do voto. 1 para Upvote (Gostei), -1 para Downvote (Não gostei).',
@@ -15,4 +15,4 @@ class RouteUpvoteDTO {
   value: number;
 }
 
-export { RouteUpvoteDTO };
+export { RoutePointUpvoteDTO };

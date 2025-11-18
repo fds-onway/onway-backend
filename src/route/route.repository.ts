@@ -15,6 +15,8 @@ import {
   routePoint,
   RouteTag,
   routeTag,
+  routeUpvote,
+  user,
 } from 'src/drizzle/schema';
 import { RoutePointRepository } from 'src/route-point/route-point.repository';
 
@@ -25,6 +27,36 @@ export class RouteRepository {
     private readonly routePointRepository: RoutePointRepository,
     private readonly cdnService: CdnService,
   ) {}
+
+  async getDetailedRouteById(id: number) {
+    const [rt] = await this.drizzleService.db
+      .select({
+        id: route.id,
+        name: route.name,
+        description: route.description,
+        tags: sql<
+          Array<string>
+        >`COALESCE(array_agg(DISTINCT ${routeTag.tag}) FILTER (WHERE ${routeTag.tag} IS NOT NULL), '{}')`,
+        upvotes: sql<number>`(
+            SELECT COALESCE(SUM(${routeUpvote.vote}), 0)
+            FROM ${routeUpvote}
+            WHERE ${routeUpvote.route} = ${route.id}
+          )`.mapWith(Number),
+        ownerId: route.owner,
+        ownerName: user.name,
+        images: sql<
+          Array<string>
+        >`COALESCE(array_agg(DISTINCT ${routeImage.imageUrl}) FILTER (WHERE ${routeImage.imageUrl} IS NOT NULL), '{}')`,
+      })
+      .from(route)
+      .where(eq(route.id, id))
+      .leftJoin(routeTag, eq(route.id, routeTag.route))
+      .leftJoin(routeImage, eq(route.id, routeImage.route))
+      .leftJoin(user, eq(route.owner, user.id))
+      .groupBy(route.id, route.name, route.description, route.owner, user.name);
+
+    return rt;
+  }
 
   async getRouteById(id: number): Promise<Route> {
     const [rt] = await this.drizzleService.db
