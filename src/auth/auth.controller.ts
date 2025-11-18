@@ -18,12 +18,12 @@ import { AuthGuard as PassportAuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { User } from 'src/drizzle/schema';
+import { UserService } from 'src/user/user.service';
 import {
   ConflictErrorDTO,
   UnauthorizedErrorDTO,
   ValidationErrorDTO,
-} from 'src/error.dto';
-import { UserService } from 'src/user/user.service';
+} from '../error.dto';
 import {
   FailedLoginDTO,
   ForgotPasswordDTO,
