@@ -16,6 +16,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiOperation,
   ApiParam,
   ApiQuery,
@@ -188,6 +189,43 @@ export class RouteController {
     await this.routeService.delete(id);
   }
 
+  @ApiOperation({
+    summary: 'Editar uma rota (Sincronização Completa)',
+    description:
+      'Atualiza uma rota existente. Esta rota é inteligente: ela sincroniza o estado atual com o DTO enviado. Isso significa que ela atualiza textos, remove imagens/pontos que não estão mais na lista, cria novos pontos/imagens adicionados e reordena a sequência dos pontos conforme a lista enviada.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'O ID da rota que será editada',
+    example: 29,
+    type: Number,
+  })
+  @ApiBody({
+    type: UpdateRouteDTO,
+    description:
+      'O objeto contendo as atualizações. Pontos sem ID serão criados, pontos com ID serão atualizados/reordenados.',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'A rota foi atualizada com sucesso.',
+    type: SucessfulCreatedRouteDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description:
+      'O valor fornecido na URI não é válido ou o corpo da requisição contém dados inválidos (ex: UUIDs malformados).',
+    type: BadRequestErrorDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'O id fornecido na URI não foi encontrado.',
+    type: NotFoundErrorDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Algo deu errado ao processar a edição da rota.',
+  })
+  @ApiBearerAuth()
   @Patch(':id')
   async edit(
     @Param('id', ParseIntPipe, RouteExistsPipe) id: number,

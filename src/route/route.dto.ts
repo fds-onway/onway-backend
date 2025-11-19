@@ -479,6 +479,5 @@ export {
   FullRouteDTO,
   ResumedRouteDTO,
   SucessfulCreatedRouteDTO,
-  UpdateRouteDTO
+  UpdateRouteDTO,
 };
-
