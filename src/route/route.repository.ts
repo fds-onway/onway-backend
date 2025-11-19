@@ -13,6 +13,7 @@ import {
   Route,
   routeImage,
   routePoint,
+  routeRating,
   RouteTag,
   routeTag,
   user,
@@ -36,11 +37,16 @@ export class RouteRepository {
         tags: sql<
           Array<string>
         >`COALESCE(array_agg(DISTINCT ${routeTag.tag}) FILTER (WHERE ${routeTag.tag} IS NOT NULL), '{}')`,
-        // upvotes: sql<number>`(
-        //     SELECT COALESCE(SUM(${routeUpvote.vote}), 0)
-        //     FROM ${routeUpvote}
-        //     WHERE ${routeUpvote.route} = ${route.id}
-        //   )`.mapWith(Number),
+        rating: sql<number>`(
+            SELECT COALESCE(AVG(${routeRating.review}), 0)
+            FROM ${routeRating}
+            WHERE ${routeRating.route} = ${route.id}
+          )`.mapWith(Number),
+        ratingCount: sql<number>`(
+            SELECT COALESCE(COUNT(${routeRating.review}), 0)
+            FROM ${routeRating}
+            WHERE ${routeRating.route} = ${route.id}
+          )`.mapWith(Number),
         ownerId: route.owner,
         ownerName: user.name,
         images: sql<
@@ -128,6 +134,16 @@ export class RouteRepository {
         name: route.name,
         description: route.description,
         tags: sql<Array<string>>`array_agg(${routeTag.tag})`,
+        rating: sql<number>`(
+            SELECT COALESCE(AVG(${routeRating.review}), 0)
+            FROM ${routeRating}
+            WHERE ${routeRating.route} = ${route.id}
+          )`.mapWith(Number),
+        ratingCount: sql<number>`(
+            SELECT COALESCE(COUNT(${routeRating.review}), 0)
+            FROM ${routeRating}
+            WHERE ${routeRating.route} = ${route.id}
+          )`.mapWith(Number),
       })
       .from(route)
       .leftJoin(routeTag, eq(route.id, routeTag.route))

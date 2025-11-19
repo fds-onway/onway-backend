@@ -3,22 +3,11 @@ import {
   IsIn,
   IsNumber,
   IsOptional,
-  IsPositive,
   IsString,
   MaxLength,
 } from 'class-validator';
 
 class NewRouteRatingDTO {
-  @ApiProperty({
-    description: 'A rota a qual a review está sendo feita.',
-    example: 1,
-    required: true,
-    type: 'number',
-  })
-  @IsNumber()
-  @IsPositive()
-  route: number;
-
   @ApiProperty({
     description: 'A nota da review em si, podendo ser entre 1 e 5.',
     example: 4.5,

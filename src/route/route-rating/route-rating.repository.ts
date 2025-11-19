@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
-import { routeRating, RouteRating } from 'src/drizzle/schema';
+import {
+  routeRating,
+  RouteRating,
+  routeRatingUpvote,
+  user,
+} from 'src/drizzle/schema';
 import { EditRouteRatingDTO, NewRouteRatingDTO } from './route-rating.dto';
 
 @Injectable()
@@ -40,6 +45,39 @@ export class RouteRatingRepository {
       .where(eq(routeRating.id, id));
 
     return rating;
+  }
+
+  async getAllReviewsInOneRoute(routeId: number) {
+    const upvotesSq = sql`(
+      SELECT COALESCE(SUM(${routeRatingUpvote.vote}), 0)
+      FROM ${routeRatingUpvote}
+      WHERE ${routeRatingUpvote.routeRating} = ${routeRating.id}
+    )`;
+
+    const routeReviews = await this.drizzleService.db
+      .select({
+        id: routeRating.id,
+        title: routeRating.title,
+        description: routeRating.description,
+        rating: routeRating.review,
+        upvotes: upvotesSq.mapWith(Number),
+        authorName: user.name,
+        createdAt: routeRating.createdAt,
+      })
+      .from(routeRating)
+      .innerJoin(user, eq(routeRating.user, user.id))
+      .where(eq(routeRating.route, routeId))
+      .groupBy(
+        routeRating.id,
+        routeRating.title,
+        routeRating.description,
+        routeRating.review,
+        user.name,
+        routeRating.createdAt,
+      )
+      .orderBy(desc(upvotesSq), desc(routeRating.createdAt));
+
+    return routeReviews;
   }
 
   async edit(

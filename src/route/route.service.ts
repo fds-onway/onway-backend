@@ -5,6 +5,7 @@ import Fuse from 'fuse.js';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
 import { Route } from 'src/drizzle/schema';
 import { RoutePointRepository } from 'src/route-point/route-point.repository';
+import { RouteRatingRepository } from './route-rating/route-rating.repository';
 import { CreateRouteDTO } from './route.dto';
 import { RouteRepository } from './route.repository';
 
@@ -14,6 +15,7 @@ export class RouteService {
     private readonly drizzleService: DrizzleService,
     private readonly routePointRepository: RoutePointRepository,
     private readonly routeRepository: RouteRepository,
+    private readonly routeRatingRepository: RouteRatingRepository,
   ) {}
 
   async create(body: CreateRouteDTO, request: Request): Promise<Route> {
@@ -102,11 +104,15 @@ export class RouteService {
   async describe(id: number) {
     const route = await this.routeRepository.getDetailedRouteById(id);
 
-    route['points'] = await this.routePointRepository.getAllPointsInOneRoute(
-      route.id,
-    );
+    const routeWithPointsAndReviews = {
+      ...route,
+      points: await this.routePointRepository.getAllPointsInOneRoute(route.id),
+      reviews: await this.routeRatingRepository.getAllReviewsInOneRoute(
+        route.id,
+      ),
+    };
 
-    return route;
+    return routeWithPointsAndReviews;
   }
 
   async delete(id: number): Promise<void> {

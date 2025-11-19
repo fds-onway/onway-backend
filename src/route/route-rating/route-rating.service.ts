@@ -24,10 +24,11 @@ export class RouteRatingService {
   }
 
   async create(routeId: number, userId: number, dto: NewRouteRatingDTO) {
-    if (
-      typeof this.routeRatingRepository.getUserRating(routeId, userId) !==
-      'undefined'
-    )
+    const rating = await this.routeRatingRepository.getUserRating(
+      routeId,
+      userId,
+    );
+    if (typeof rating !== 'undefined')
       throw new UserAlreadyRatedError(
         'Esse usuário já fez uma review nesta rota',
       );

@@ -270,6 +270,52 @@ class ResumedRouteDTO {
   image: string;
 }
 
+class RouteReviewDTO {
+  @ApiProperty({
+    example: 1,
+    description: 'O ID da review.',
+  })
+  id: number;
+
+  @ApiProperty({
+    example: 'Gostei pra krl!',
+    description: 'O título da avaliação.',
+  })
+  title: string;
+
+  @ApiProperty({
+    example: 'Achei a trilha muito bem cuidada...',
+    description: 'A descrição da avaliação (pode ser nula).',
+    nullable: true,
+    required: false,
+  })
+  description: string | null;
+
+  @ApiProperty({
+    example: 4.5,
+    description: 'A nota dada (1.0 a 5.0).',
+  })
+  rating: number;
+
+  @ApiProperty({
+    example: 10,
+    description: 'Quantos votos "Útil" esta review recebeu.',
+  })
+  upvotes: number;
+
+  @ApiProperty({
+    example: 'Matheus Augusto',
+    description: 'O nome do autor da review.',
+  })
+  authorName: string;
+
+  @ApiProperty({
+    example: '2025-11-19T17:26:59.895Z',
+    description: 'Data de criação da review.',
+  })
+  createdAt: Date;
+}
+
 class FullRoutePointDTO {
   @ApiProperty({
     example: 7,
@@ -304,12 +350,6 @@ class FullRoutePointDTO {
     ],
   })
   type: string;
-
-  @ApiProperty({
-    example: 15,
-    description: 'A quantidade de votos (upvotes - downvotes) deste ponto.',
-  })
-  upvotes: number;
 
   @ApiProperty({
     example: '-23.456789',
@@ -367,10 +407,16 @@ class FullRouteDTO {
   tags: string[];
 
   @ApiProperty({
-    example: 120,
-    description: 'A quantidade total de upvotes da rota.',
+    example: 4.5,
+    description: 'A nota média da rota (calculada baseada nas reviews).',
   })
-  upvotes: number;
+  rating: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'A quantidade total de avaliações que esta rota recebeu.',
+  })
+  ratingCount: number;
 
   @ApiProperty({
     example: 13,
@@ -400,6 +446,15 @@ class FullRouteDTO {
   })
   @Type(() => FullRoutePointDTO)
   points: FullRoutePointDTO[];
+
+  @ApiProperty({
+    type: () => RouteReviewDTO,
+    isArray: true,
+    description:
+      'Lista das avaliações (reviews) feitas pelos usuários para esta rota.',
+  })
+  @Type(() => RouteReviewDTO)
+  reviews: RouteReviewDTO[];
 }
 
 class UpdateRouteDTO extends PartialType(
@@ -411,5 +466,6 @@ export {
   FullRouteDTO,
   ResumedRouteDTO,
   SucessfulCreatedRouteDTO,
-  UpdateRouteDTO,
+  UpdateRouteDTO
 };
+
