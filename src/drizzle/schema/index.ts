@@ -64,6 +64,5 @@ export {
   routeTag,
   RouteTag,
   user,
-  User
+  User,
 };
-

@@ -11,7 +11,7 @@ import {
   RoutePoint,
   routePoint,
   RoutePointImage,
-  routePointImage
+  routePointImage,
 } from 'src/drizzle/schema';
 import { RoutePointDTO } from './route-point.dto';
 
