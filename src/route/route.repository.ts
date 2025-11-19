@@ -95,6 +95,13 @@ export class RouteRepository {
     return createdRoute;
   }
 
+  async getAllTagsInOneRoute(routeId: number): Promise<Array<RouteTag>> {
+    return await this.drizzleService.db
+      .select()
+      .from(routeTag)
+      .where(eq(routeTag.route, routeId));
+  }
+
   async createTagWithTransaction(
     transaction: PgTransaction<
       NodePgQueryResultHKT,
@@ -109,6 +116,17 @@ export class RouteRepository {
       .returning();
 
     return createdRouteTag;
+  }
+
+  async deleteTagWithTransaction(
+    transaction: PgTransaction<
+      NodePgQueryResultHKT,
+      typeof schema,
+      ExtractTablesWithRelations<typeof schema>
+    >,
+    id: number,
+  ): Promise<void> {
+    await transaction.delete(routeTag).where(eq(routeTag.id, id));
   }
 
   async createRouteImageWithTransaction(
@@ -207,5 +225,50 @@ export class RouteRepository {
     ]);
 
     await this.drizzleService.db.delete(route).where(eq(route.id, id));
+  }
+
+  async editWithTransaction(
+    transaction: PgTransaction<
+      NodePgQueryResultHKT,
+      typeof schema,
+      ExtractTablesWithRelations<typeof schema>
+    >,
+    routeId: number,
+    dto: Partial<Route>,
+  ): Promise<Route> {
+    const [editedRoute] = await transaction
+      .update(route)
+      .set(dto)
+      .where(eq(route.id, routeId))
+      .returning();
+
+    return editedRoute;
+  }
+
+  async getImagesByRouteId(routeId: number) {
+    return await this.drizzleService.db
+      .select()
+      .from(routeImage)
+      .where(eq(routeImage.route, routeId));
+  }
+
+  async deleteRouteImageWithTransaction(
+    transaction: PgTransaction<
+      NodePgQueryResultHKT,
+      typeof schema,
+      ExtractTablesWithRelations<typeof schema>
+    >,
+    id: number,
+  ): Promise<void> {
+    const [rtImage] = await transaction
+      .select()
+      .from(routeImage)
+      .where(eq(routeImage.id, id));
+
+    if (rtImage) {
+      await this.cdnService.deleteFile('routes', rtImage.filePath);
+
+      await transaction.delete(routeImage).where(eq(routeImage.id, id));
+    }
   }
 }

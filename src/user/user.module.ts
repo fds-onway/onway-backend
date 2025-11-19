@@ -1,5 +1,4 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from 'src/auth/auth.module';
 import { DrizzleModule } from 'src/drizzle/drizzle.module';
 import { EmailModule } from 'src/email/email.module';
@@ -14,7 +13,6 @@ import { UserService } from './user.service';
     DrizzleModule,
     EmailModule,
     forwardRef(() => RouteModule),
-    JwtModule,
     forwardRef(() => AuthModule),
   ],
   controllers: [UserController],

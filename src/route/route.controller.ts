@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   Req,
@@ -36,6 +37,7 @@ import {
   FullRouteDTO,
   ResumedRouteDTO,
   SucessfulCreatedRouteDTO,
+  UpdateRouteDTO,
 } from './route.dto';
 import { RouteService } from './route.service';
 
@@ -184,5 +186,14 @@ export class RouteController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id', ParseIntPipe, RouteExistsPipe) id: number) {
     await this.routeService.delete(id);
+  }
+
+  @Patch(':id')
+  async edit(
+    @Param('id', ParseIntPipe, RouteExistsPipe) id: number,
+    @Body() dto: UpdateRouteDTO,
+    @Req() request: Request,
+  ) {
+    return await this.routeService.edit(id, dto, request);
   }
 }

@@ -1,4 +1,4 @@
-import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayNotEmpty,
@@ -7,6 +7,9 @@ import {
   IsEnum,
   IsLatitude,
   IsLongitude,
+  IsNumber,
+  IsOptional,
+  IsPositive,
   IsString,
   IsUrl,
   MaxLength,
@@ -55,6 +58,18 @@ class ImagePointDTO {
 }
 
 class PointDTO {
+  @ApiProperty({
+    example: 1,
+    type: Number,
+    description:
+      'O Id do ponto, (é utilizado apenas quando está editando a rota)',
+    required: false,
+  })
+  @IsNumber()
+  @IsPositive()
+  @IsOptional()
+  id: number;
+
   @ApiProperty({
     example: 'Rio São João',
     description: 'O nome que o ponto terá',
@@ -457,9 +472,7 @@ class FullRouteDTO {
   reviews: RouteReviewDTO[];
 }
 
-class UpdateRouteDTO extends PartialType(
-  OmitType(CreateRouteDTO, ['points'] as const),
-) {}
+class UpdateRouteDTO extends PartialType(CreateRouteDTO) {}
 
 export {
   CreateRouteDTO,

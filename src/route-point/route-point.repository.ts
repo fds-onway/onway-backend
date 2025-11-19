@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable } from '@nestjs/common';
 import { eq, ExtractTablesWithRelations, sql } from 'drizzle-orm';
 import { NodePgQueryResultHKT } from 'drizzle-orm/node-postgres';
@@ -110,6 +111,24 @@ export class RoutePointRepository {
       .where(eq(routePointImage.id, id));
   }
 
+  async deleteRoutePointImageWithTransaction(
+    transaction: PgTransaction<
+      NodePgQueryResultHKT,
+      typeof schema,
+      ExtractTablesWithRelations<typeof schema>
+    >,
+    id: number,
+  ): Promise<void> {
+    const [rtPointImg] = await transaction
+      .select()
+      .from(routePointImage)
+      .where(eq(routePointImage.id, id));
+
+    await this.cdnService.deleteFile('points', rtPointImg.filePath);
+
+    await transaction.delete(routePointImage).where(eq(routePointImage.id, id));
+  }
+
   async deleteRoutePoint(id: number): Promise<void> {
     const [rtPoint] = await this.drizzleService.db
       .select({
@@ -128,5 +147,58 @@ export class RoutePointRepository {
     await this.drizzleService.db
       .delete(routePoint)
       .where(eq(routePoint.id, id));
+  }
+
+  async deleteRoutePointWithTransaction(
+    transaction: PgTransaction<
+      NodePgQueryResultHKT,
+      typeof schema,
+      ExtractTablesWithRelations<typeof schema>
+    >,
+    id: number,
+  ): Promise<void> {
+    const [rtPoint] = await transaction
+      .select({
+        id: routePoint.id,
+        imageIdList: sql<Array<number>>`array_agg(${routePointImage.id})`,
+      })
+      .from(routePoint)
+      .where(eq(routePoint.id, id))
+      .leftJoin(routePointImage, eq(routePoint.id, routePointImage.routePoint))
+      .groupBy(routePoint.id);
+
+    await Promise.all(
+      rtPoint.imageIdList.map((imageId) =>
+        this.deleteRoutePointImageWithTransaction(transaction, imageId),
+      ),
+    );
+
+    await transaction.delete(routePoint).where(eq(routePoint.id, id));
+  }
+
+  async editRoutePointWithTransaction(
+    transaction: PgTransaction<
+      NodePgQueryResultHKT,
+      typeof schema,
+      ExtractTablesWithRelations<typeof schema>
+    >,
+    id: number,
+    dto: Partial<RoutePoint>,
+  ): Promise<RoutePoint> {
+    const { id: _, ...setDto } = dto;
+    const [editedRoutePoint] = await transaction
+      .update(routePoint)
+      .set(setDto)
+      .where(eq(routePoint.id, id))
+      .returning();
+
+    return editedRoutePoint;
+  }
+
+  async getImagesByPointId(pointId: number) {
+    return await this.drizzleService.db
+      .select()
+      .from(routePointImage)
+      .where(eq(routePointImage.routePoint, pointId));
   }
 }
