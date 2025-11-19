@@ -1,23 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
-import { routePointUpvote, RoutePointUpvote } from 'src/drizzle/schema';
+import { RouteRatingUpvote, routeRatingUpvote } from 'src/drizzle/schema';
 
 @Injectable()
-export class RoutePointUpvoteRepository {
+export class RouteRatingUpvoteRepository {
   constructor(private readonly drizzleService: DrizzleService) {}
 
   async getByUser(
     userId: number,
-    routePointId: number,
-  ): Promise<RoutePointUpvote> {
+    routeRatingId: number,
+  ): Promise<RouteRatingUpvote> {
     const [existingVote] = await this.drizzleService.db
       .select()
-      .from(routePointUpvote)
+      .from(routeRatingUpvote)
       .where(
         and(
-          eq(routePointUpvote.user, userId),
-          eq(routePointUpvote.routePoint, routePointId),
+          eq(routeRatingUpvote.user, userId),
+          eq(routeRatingUpvote.routeRating, routeRatingId),
         ),
       );
 
@@ -26,41 +26,41 @@ export class RoutePointUpvoteRepository {
 
   async create(
     userId: number,
-    routePointId: number,
+    routeRatingId: number,
     vote: 1 | -1,
-  ): Promise<RoutePointUpvote> {
+  ): Promise<RouteRatingUpvote> {
     const [createdVote] = await this.drizzleService.db
-      .insert(routePointUpvote)
-      .values({ user: userId, routePoint: routePointId, vote })
+      .insert(routeRatingUpvote)
+      .values({ user: userId, routeRating: routeRatingId, vote })
       .returning();
     return createdVote;
   }
 
   async update(
     userId: number,
-    routePointId: number,
+    routeRatingId: number,
     vote: 1 | -1,
-  ): Promise<RoutePointUpvote> {
+  ): Promise<RouteRatingUpvote> {
     const [updatedVote] = await this.drizzleService.db
-      .update(routePointUpvote)
+      .update(routeRatingUpvote)
       .set({ vote })
       .where(
         and(
-          eq(routePointUpvote.user, userId),
-          eq(routePointUpvote.routePoint, routePointId),
+          eq(routeRatingUpvote.user, userId),
+          eq(routeRatingUpvote.routeRating, routeRatingId),
         ),
       )
       .returning();
     return updatedVote;
   }
 
-  async delete(userId: number, routePointId: number): Promise<void> {
+  async delete(userId: number, routeRatingId: number): Promise<void> {
     await this.drizzleService.db
-      .delete(routePointUpvote)
+      .delete(routeRatingUpvote)
       .where(
         and(
-          eq(routePointUpvote.routePoint, routePointId),
-          eq(routePointUpvote.user, userId),
+          eq(routeRatingUpvote.routeRating, routeRatingId),
+          eq(routeRatingUpvote.user, userId),
         ),
       );
   }

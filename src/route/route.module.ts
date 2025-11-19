@@ -3,10 +3,10 @@ import { AuthModule } from 'src/auth/auth.module';
 import { CdnModule } from 'src/cdn/cdn.module';
 import { DrizzleModule } from 'src/drizzle/drizzle.module';
 import { RoutePointModule } from 'src/route-point/route-point.module';
+import { RouteRatingModule } from './route-rating/route-rating.module';
 import { RouteController } from './route.controller';
 import { RouteRepository } from './route.repository';
 import { RouteService } from './route.service';
-import { RouteUpvoteModule } from './route-upvote/route-upvote.module';
 
 @Module({
   imports: [
@@ -14,7 +14,7 @@ import { RouteUpvoteModule } from './route-upvote/route-upvote.module';
     DrizzleModule,
     forwardRef(() => AuthModule),
     CdnModule,
-    RouteUpvoteModule,
+    RouteRatingModule,
   ],
   controllers: [RouteController],
   providers: [RouteService, RouteRepository],

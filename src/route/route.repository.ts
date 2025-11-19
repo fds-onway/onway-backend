@@ -15,7 +15,6 @@ import {
   routePoint,
   RouteTag,
   routeTag,
-  routeUpvote,
   user,
 } from 'src/drizzle/schema';
 import { RoutePointRepository } from 'src/route-point/route-point.repository';
@@ -37,11 +36,11 @@ export class RouteRepository {
         tags: sql<
           Array<string>
         >`COALESCE(array_agg(DISTINCT ${routeTag.tag}) FILTER (WHERE ${routeTag.tag} IS NOT NULL), '{}')`,
-        upvotes: sql<number>`(
-            SELECT COALESCE(SUM(${routeUpvote.vote}), 0)
-            FROM ${routeUpvote}
-            WHERE ${routeUpvote.route} = ${route.id}
-          )`.mapWith(Number),
+        // upvotes: sql<number>`(
+        //     SELECT COALESCE(SUM(${routeUpvote.vote}), 0)
+        //     FROM ${routeUpvote}
+        //     WHERE ${routeUpvote.route} = ${route.id}
+        //   )`.mapWith(Number),
         ownerId: route.owner,
         ownerName: user.name,
         images: sql<

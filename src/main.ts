@@ -62,7 +62,7 @@ async function bootstrap() {
       },
       {
         name: 'Rotas, Pontos e Sugestão de Pontos',
-        tags: ['Rotas', 'Upvotes'],
+        tags: ['Rotas', 'Reviews', 'Upvotes'],
       },
       {
         name: 'Imagens',

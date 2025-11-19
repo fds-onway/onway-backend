@@ -16,11 +16,10 @@ const routeRating = pgTable('route_rating', {
   route: integer()
     .notNull()
     .references(() => route.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-  review: numeric({ precision: 3, scale: 2 }).notNull(),
-  title: varchar({ length: 127 }).notNull(),
+  review: numeric({ precision: 3, scale: 2, mode: 'number' }).notNull(),
+  title: varchar({ length: 128 }).notNull(),
   description: text(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  upvotes: integer().notNull().default(0),
   user: integer()
     .notNull()
     .references(() => user.id),

@@ -78,6 +78,13 @@
       "when": 1763493707447,
       "tag": "0010_thin_marvel_apes",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1763518286386,
+      "tag": "0011_sticky_eternals",
+      "breakpoints": true
     }
   ]
 }
