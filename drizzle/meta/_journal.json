@@ -85,6 +85,13 @@
       "when": 1763518286386,
       "tag": "0011_sticky_eternals",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1763519612403,
+      "tag": "0012_blushing_puff_adder",
+      "breakpoints": true
     }
   ]
 }

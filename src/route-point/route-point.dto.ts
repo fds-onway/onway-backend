@@ -71,14 +71,6 @@ class RoutePointDTO {
     | 'miscelania';
 
   @ApiProperty({
-    example: 123,
-    description: 'O número de upvotes do ponto',
-    type: 'number',
-  })
-  @IsNumber()
-  upvotes: number;
-
-  @ApiProperty({
     example: '-20.912323',
     description: 'Latitude do ponto. Formato: xx.xxxxxx',
     type: 'string',
