@@ -13,6 +13,10 @@ import routePointRating, {
   NewRoutePointRating,
   RoutePointRating,
 } from './route-point-rating';
+import routePointRatingUpvote, {
+  NewRoutePointRatingUpvote,
+  RoutePointRatingUpvote,
+} from './route-point-rating-upvote';
 import routePointSuggestion, {
   NewRoutePointSuggestion,
   RoutePointSuggestion,
@@ -35,6 +39,7 @@ export {
   NewRoutePoint,
   NewRoutePointImage,
   NewRoutePointRating,
+  NewRoutePointRatingUpvote,
   NewRoutePointSuggestion,
   NewRouteProgress,
   NewRouteRating,
@@ -52,6 +57,8 @@ export {
   RoutePointImage,
   routePointRating,
   RoutePointRating,
+  routePointRatingUpvote,
+  RoutePointRatingUpvote,
   routePointSuggestion,
   RoutePointSuggestion,
   routePointTypeEnum,

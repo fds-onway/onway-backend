@@ -5,8 +5,6 @@ import { ApiDetailsDto } from './api-details.dto';
 @Controller()
 @ApiTags('Miscelânia')
 export class AppController {
-  constructor() {}
-
   @Get()
   @ApiOperation({ summary: 'Pegar dados de uso da API' })
   @ApiResponse({

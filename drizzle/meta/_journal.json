@@ -92,6 +92,13 @@
       "when": 1763519612403,
       "tag": "0012_blushing_puff_adder",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1763587793935,
+      "tag": "0013_sturdy_spencer_smythe",
+      "breakpoints": true
     }
   ]
 }
