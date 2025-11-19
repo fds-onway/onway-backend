@@ -14,5 +14,6 @@ import { RoutePointRatingService } from './route-point-rating.service';
     DrizzleModule,
     forwardRef(() => AuthModule),
   ],
+  exports: [RoutePointRatingRepository],
 })
 export class RoutePointRatingModule {}

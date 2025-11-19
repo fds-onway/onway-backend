@@ -85,8 +85,6 @@ export class RouteService {
     body: UpdateRouteDTO,
     request: Request,
   ): Promise<Route> {
-    const userId = request.headers['user-id'];
-
     const route = await this.drizzleService.db.transaction(async (trx) => {
       if (body.name || body.description) {
         await this.routeRepository.editWithTransaction(trx, routeId, body);

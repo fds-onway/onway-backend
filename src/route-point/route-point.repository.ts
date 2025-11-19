@@ -15,13 +15,14 @@ import {
   routePointImage,
   routePointRating,
 } from 'src/drizzle/schema';
-import { RoutePointDTO } from './route-point.dto';
+import { RoutePointRatingRepository } from './route-point-rating/route-point-rating.repository';
 
 @Injectable()
 export class RoutePointRepository {
   constructor(
     private readonly drizzleService: DrizzleService,
     private readonly cdnService: CdnService,
+    private readonly routePointRatingRepository: RoutePointRatingRepository,
   ) {}
 
   async getById(id: number): Promise<RoutePoint> {
@@ -32,7 +33,7 @@ export class RoutePointRepository {
     return rtPoint;
   }
 
-  async getAllPointsInOneRoute(routeId: number): Promise<Array<RoutePointDTO>> {
+  async getAllPointsInOneRoute(routeId: number) {
     const routePoints = await this.drizzleService.db
       .select({
         id: routePoint.id,
@@ -69,7 +70,17 @@ export class RoutePointRepository {
       )
       .orderBy(routePoint.sequence);
 
-    return routePoints;
+    return Promise.all(
+      routePoints.map(async (routePoint) => {
+        return {
+          ...routePoint,
+          reviews:
+            await this.routePointRatingRepository.getAllReviewsInOneRoutePoint(
+              routePoint.id,
+            ),
+        };
+      }),
+    );
   }
 
   async createWithTransaction(
