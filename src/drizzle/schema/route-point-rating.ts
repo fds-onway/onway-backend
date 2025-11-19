@@ -13,7 +13,7 @@ import { user } from './user';
 
 const routePointRating = pgTable('route_point_rating', {
   id: serial().primaryKey(),
-  review: numeric({ precision: 3, scale: 2 }).notNull(),
+  review: numeric({ precision: 3, scale: 2, mode: 'number' }).notNull(),
   routePoint: integer('route_point')
     .notNull()
     .references(() => routePoint.id, {
@@ -23,7 +23,6 @@ const routePointRating = pgTable('route_point_rating', {
   title: varchar({ length: 256 }).notNull(),
   description: text(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  upvotes: integer().notNull().default(0),
   user: integer()
     .notNull()
     .references(() => user.id, { onDelete: 'cascade', onUpdate: 'cascade' }),

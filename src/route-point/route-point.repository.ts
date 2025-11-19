@@ -13,6 +13,7 @@ import {
   routePoint,
   RoutePointImage,
   routePointImage,
+  routePointRating,
 } from 'src/drizzle/schema';
 import { RoutePointDTO } from './route-point.dto';
 
@@ -38,11 +39,16 @@ export class RoutePointRepository {
         name: routePoint.name,
         description: routePoint.description,
         type: routePoint.type,
-        // upvotes: sql<number>`(
-        //     SELECT COALESCE(SUM(${routePointUpvote.vote}), 0)
-        //     FROM ${routePointUpvote}
-        //     WHERE ${routePointUpvote.routePoint} = ${routePoint.id}
-        //   )`.mapWith(Number),
+        rating: sql<number>`(
+            SELECT COALESCE(SUM(${routePointRating.review}), 0)
+            FROM ${routePointRating}
+            WHERE ${routePointRating.routePoint} = ${routePoint.id}
+          )`.mapWith(Number),
+        ratingCount: sql<number>`(
+            SELECT COALESCE(COUNT(${routePointRating.review}), 0)
+            FROM ${routePointRating}
+            WHERE ${routePointRating.routePoint} = ${routePoint.id}
+          )`.mapWith(Number),
         latitude: routePoint.latitude,
         longitude: routePoint.longitude,
         sequence: routePoint.sequence,
