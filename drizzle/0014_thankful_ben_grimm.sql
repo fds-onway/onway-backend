@@ -1,0 +1,1 @@
+ALTER TABLE "route_point_rating" DROP COLUMN "upvotes";

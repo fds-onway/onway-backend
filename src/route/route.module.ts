@@ -3,6 +3,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { CdnModule } from 'src/cdn/cdn.module';
 import { DrizzleModule } from 'src/drizzle/drizzle.module';
 import { RoutePointModule } from 'src/route-point/route-point.module';
+import { RouteRatingModule } from './route-rating/route-rating.module';
 import { RouteController } from './route.controller';
 import { RouteRepository } from './route.repository';
 import { RouteService } from './route.service';
@@ -13,6 +14,7 @@ import { RouteService } from './route.service';
     DrizzleModule,
     forwardRef(() => AuthModule),
     CdnModule,
+    RouteRatingModule,
   ],
   controllers: [RouteController],
   providers: [RouteService, RouteRepository],

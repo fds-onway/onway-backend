@@ -13,8 +13,10 @@ import {
   Route,
   routeImage,
   routePoint,
+  routeRating,
   RouteTag,
   routeTag,
+  user,
 } from 'src/drizzle/schema';
 import { RoutePointRepository } from 'src/route-point/route-point.repository';
 
@@ -25,6 +27,41 @@ export class RouteRepository {
     private readonly routePointRepository: RoutePointRepository,
     private readonly cdnService: CdnService,
   ) {}
+
+  async getDetailedRouteById(id: number) {
+    const [rt] = await this.drizzleService.db
+      .select({
+        id: route.id,
+        name: route.name,
+        description: route.description,
+        tags: sql<
+          Array<string>
+        >`COALESCE(array_agg(DISTINCT ${routeTag.tag}) FILTER (WHERE ${routeTag.tag} IS NOT NULL), '{}')`,
+        rating: sql<number>`(
+            SELECT COALESCE(AVG(${routeRating.review}), 0)
+            FROM ${routeRating}
+            WHERE ${routeRating.route} = ${route.id}
+          )`.mapWith(Number),
+        ratingCount: sql<number>`(
+            SELECT COALESCE(COUNT(${routeRating.review}), 0)
+            FROM ${routeRating}
+            WHERE ${routeRating.route} = ${route.id}
+          )`.mapWith(Number),
+        ownerId: route.owner,
+        ownerName: user.name,
+        images: sql<
+          Array<string>
+        >`COALESCE(array_agg(DISTINCT ${routeImage.imageUrl}) FILTER (WHERE ${routeImage.imageUrl} IS NOT NULL), '{}')`,
+      })
+      .from(route)
+      .where(eq(route.id, id))
+      .leftJoin(routeTag, eq(route.id, routeTag.route))
+      .leftJoin(routeImage, eq(route.id, routeImage.route))
+      .leftJoin(user, eq(route.owner, user.id))
+      .groupBy(route.id, route.name, route.description, route.owner, user.name);
+
+    return rt;
+  }
 
   async getRouteById(id: number): Promise<Route> {
     const [rt] = await this.drizzleService.db
@@ -58,6 +95,13 @@ export class RouteRepository {
     return createdRoute;
   }
 
+  async getAllTagsInOneRoute(routeId: number): Promise<Array<RouteTag>> {
+    return await this.drizzleService.db
+      .select()
+      .from(routeTag)
+      .where(eq(routeTag.route, routeId));
+  }
+
   async createTagWithTransaction(
     transaction: PgTransaction<
       NodePgQueryResultHKT,
@@ -72,6 +116,17 @@ export class RouteRepository {
       .returning();
 
     return createdRouteTag;
+  }
+
+  async deleteTagWithTransaction(
+    transaction: PgTransaction<
+      NodePgQueryResultHKT,
+      typeof schema,
+      ExtractTablesWithRelations<typeof schema>
+    >,
+    id: number,
+  ): Promise<void> {
+    await transaction.delete(routeTag).where(eq(routeTag.id, id));
   }
 
   async createRouteImageWithTransaction(
@@ -97,6 +152,16 @@ export class RouteRepository {
         name: route.name,
         description: route.description,
         tags: sql<Array<string>>`array_agg(${routeTag.tag})`,
+        rating: sql<number>`(
+            SELECT COALESCE(AVG(${routeRating.review}), 0)
+            FROM ${routeRating}
+            WHERE ${routeRating.route} = ${route.id}
+          )`.mapWith(Number),
+        ratingCount: sql<number>`(
+            SELECT COALESCE(COUNT(${routeRating.review}), 0)
+            FROM ${routeRating}
+            WHERE ${routeRating.route} = ${route.id}
+          )`.mapWith(Number),
       })
       .from(route)
       .leftJoin(routeTag, eq(route.id, routeTag.route))
@@ -160,5 +225,50 @@ export class RouteRepository {
     ]);
 
     await this.drizzleService.db.delete(route).where(eq(route.id, id));
+  }
+
+  async editWithTransaction(
+    transaction: PgTransaction<
+      NodePgQueryResultHKT,
+      typeof schema,
+      ExtractTablesWithRelations<typeof schema>
+    >,
+    routeId: number,
+    dto: Partial<Route>,
+  ): Promise<Route> {
+    const [editedRoute] = await transaction
+      .update(route)
+      .set(dto)
+      .where(eq(route.id, routeId))
+      .returning();
+
+    return editedRoute;
+  }
+
+  async getImagesByRouteId(routeId: number) {
+    return await this.drizzleService.db
+      .select()
+      .from(routeImage)
+      .where(eq(routeImage.route, routeId));
+  }
+
+  async deleteRouteImageWithTransaction(
+    transaction: PgTransaction<
+      NodePgQueryResultHKT,
+      typeof schema,
+      ExtractTablesWithRelations<typeof schema>
+    >,
+    id: number,
+  ): Promise<void> {
+    const [rtImage] = await transaction
+      .select()
+      .from(routeImage)
+      .where(eq(routeImage.id, id));
+
+    if (rtImage) {
+      await this.cdnService.deleteFile('routes', rtImage.filePath);
+
+      await transaction.delete(routeImage).where(eq(routeImage.id, id));
+    }
   }
 }

@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   Req,
@@ -15,6 +16,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiOperation,
   ApiParam,
   ApiQuery,
@@ -33,8 +35,10 @@ import {
 import { RouteExistsPipe } from './route-exists.pipe';
 import {
   CreateRouteDTO,
+  FullRouteDTO,
   ResumedRouteDTO,
   SucessfulCreatedRouteDTO,
+  UpdateRouteDTO,
 } from './route.dto';
 import { RouteService } from './route.service';
 
@@ -109,12 +113,43 @@ export class RouteController {
   })
   @ApiResponse({
     status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: 'Algo deu ao pesquisar as rotas.',
+    description: 'Algo deu errado ao pesquisar as rotas.',
   })
   @ApiBearerAuth()
   @Get()
   async list(@Query('q') query: string | undefined) {
     return await this.routeService.search(query);
+  }
+
+  @ApiOperation({
+    summary: 'Trazer detalhes de uma rota específica',
+    description:
+      'Rota para trazer detalhes a mais de uma rota como um todo, como todos os pontos, todas as imagens, etc',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'A rota foi consultada com sucesso.',
+    type: FullRouteDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'O valor fornecido na URI não é um valor válido',
+    type: BadRequestErrorDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description:
+      'O id fornecido na URI não foi encontrado ou não existe mais no sistema.',
+    type: NotFoundErrorDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Algo deu errado ao pesquisar a rota.',
+  })
+  @ApiBearerAuth()
+  @Get(':id')
+  async describe(@Param('id', ParseIntPipe, RouteExistsPipe) routeId: number) {
+    return await this.routeService.describe(routeId);
   }
 
   @ApiOperation({
@@ -152,5 +187,51 @@ export class RouteController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id', ParseIntPipe, RouteExistsPipe) id: number) {
     await this.routeService.delete(id);
+  }
+
+  @ApiOperation({
+    summary: 'Editar uma rota (Sincronização Completa)',
+    description:
+      'Atualiza uma rota existente. Esta rota é inteligente: ela sincroniza o estado atual com o DTO enviado. Isso significa que ela atualiza textos, remove imagens/pontos que não estão mais na lista, cria novos pontos/imagens adicionados e reordena a sequência dos pontos conforme a lista enviada.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'O ID da rota que será editada',
+    example: 29,
+    type: Number,
+  })
+  @ApiBody({
+    type: UpdateRouteDTO,
+    description:
+      'O objeto contendo as atualizações. Pontos sem ID serão criados, pontos com ID serão atualizados/reordenados.',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'A rota foi atualizada com sucesso.',
+    type: SucessfulCreatedRouteDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description:
+      'O valor fornecido na URI não é válido ou o corpo da requisição contém dados inválidos (ex: UUIDs malformados).',
+    type: BadRequestErrorDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'O id fornecido na URI não foi encontrado.',
+    type: NotFoundErrorDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Algo deu errado ao processar a edição da rota.',
+  })
+  @ApiBearerAuth()
+  @Patch(':id')
+  async edit(
+    @Param('id', ParseIntPipe, RouteExistsPipe) id: number,
+    @Body() dto: UpdateRouteDTO,
+    @Req() request: Request,
+  ) {
+    return await this.routeService.edit(id, dto, request);
   }
 }

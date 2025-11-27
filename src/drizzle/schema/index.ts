@@ -13,6 +13,10 @@ import routePointRating, {
   NewRoutePointRating,
   RoutePointRating,
 } from './route-point-rating';
+import routePointRatingUpvote, {
+  NewRoutePointRatingUpvote,
+  RoutePointRatingUpvote,
+} from './route-point-rating-upvote';
 import routePointSuggestion, {
   NewRoutePointSuggestion,
   RoutePointSuggestion,
@@ -22,6 +26,10 @@ import routeProgress, {
   RouteProgress,
 } from './route-progress';
 import routeRating, { NewRouteRating, RouteRating } from './route-rating';
+import routeRatingUpvote, {
+  NewRouteRatingUpvote,
+  RouteRatingUpvote,
+} from './route-rating-upvote';
 import routeTag, { NewRouteTag, RouteTag } from './route-tag';
 import { NewUser, roleEnum, user, User } from './user';
 
@@ -31,9 +39,11 @@ export {
   NewRoutePoint,
   NewRoutePointImage,
   NewRoutePointRating,
+  NewRoutePointRatingUpvote,
   NewRoutePointSuggestion,
   NewRouteProgress,
   NewRouteRating,
+  NewRouteRatingUpvote,
   NewRouteTag,
   NewUser,
   roleEnum,
@@ -47,6 +57,8 @@ export {
   RoutePointImage,
   routePointRating,
   RoutePointRating,
+  routePointRatingUpvote,
+  RoutePointRatingUpvote,
   routePointSuggestion,
   RoutePointSuggestion,
   routePointTypeEnum,
@@ -54,6 +66,8 @@ export {
   RouteProgress,
   routeRating,
   RouteRating,
+  routeRatingUpvote,
+  RouteRatingUpvote,
   routeTag,
   RouteTag,
   user,

@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayNotEmpty,
@@ -7,6 +7,9 @@ import {
   IsEnum,
   IsLatitude,
   IsLongitude,
+  IsNumber,
+  IsOptional,
+  IsPositive,
   IsString,
   IsUrl,
   MaxLength,
@@ -55,6 +58,18 @@ class ImagePointDTO {
 }
 
 class PointDTO {
+  @ApiProperty({
+    example: 1,
+    type: Number,
+    description:
+      'O Id do ponto, (é utilizado apenas quando está editando a rota)',
+    required: false,
+  })
+  @IsNumber()
+  @IsPositive()
+  @IsOptional()
+  id: number;
+
   @ApiProperty({
     example: 'Rio São João',
     description: 'O nome que o ponto terá',
@@ -270,4 +285,199 @@ class ResumedRouteDTO {
   image: string;
 }
 
-export { CreateRouteDTO, ResumedRouteDTO, SucessfulCreatedRouteDTO };
+class RouteReviewDTO {
+  @ApiProperty({
+    example: 1,
+    description: 'O ID da review.',
+  })
+  id: number;
+
+  @ApiProperty({
+    example: 'Gostei pra krl!',
+    description: 'O título da avaliação.',
+  })
+  title: string;
+
+  @ApiProperty({
+    example: 'Achei a trilha muito bem cuidada...',
+    description: 'A descrição da avaliação (pode ser nula).',
+    nullable: true,
+    required: false,
+  })
+  description: string | null;
+
+  @ApiProperty({
+    example: 4.5,
+    description: 'A nota dada (1.0 a 5.0).',
+  })
+  rating: number;
+
+  @ApiProperty({
+    example: 10,
+    description: 'Quantos votos "Útil" esta review recebeu.',
+  })
+  upvotes: number;
+
+  @ApiProperty({
+    example: 'Matheus Augusto',
+    description: 'O nome do autor da review.',
+  })
+  authorName: string;
+
+  @ApiProperty({
+    example: '2025-11-19T17:26:59.895Z',
+    description: 'Data de criação da review.',
+  })
+  createdAt: Date;
+}
+
+class FullRoutePointDTO {
+  @ApiProperty({
+    example: 7,
+    description: 'O ID único do ponto da rota.',
+  })
+  id: number;
+
+  @ApiProperty({
+    example: 'Cachoeira do Poção',
+    description: 'O nome do ponto.',
+  })
+  name: string;
+
+  @ApiProperty({
+    example:
+      'A primeira cachoeira da trilha, ideal para banho, com um grande poço de águas claras e acesso facilitado.',
+    description: 'A descrição detalhada do ponto.',
+  })
+  description: string;
+
+  @ApiProperty({
+    example: 'natureza',
+    description: 'A categoria do ponto.',
+    enum: [
+      'restaurante',
+      'parque',
+      'natureza',
+      'servico',
+      'hotel',
+      'entretenimento',
+      'miscelania',
+    ],
+  })
+  type: string;
+
+  @ApiProperty({
+    example: '-23.456789',
+    description: 'Latitude do ponto.',
+  })
+  latitude: string;
+
+  @ApiProperty({
+    example: '-45.123456',
+    description: 'Longitude do ponto.',
+  })
+  longitude: string;
+
+  @ApiProperty({
+    example: 0,
+    description: 'A ordem sequencial deste ponto na rota (começando em 0).',
+  })
+  sequence: number;
+
+  @ApiProperty({
+    example: [
+      'https://onway-cdn-bucket.s3.us-east-1.amazonaws.com/p1a2b3c4.jpg',
+    ],
+    description: 'Lista de URLs das imagens deste ponto.',
+    type: [String],
+  })
+  images: string[];
+}
+
+class FullRouteDTO {
+  @ApiProperty({
+    example: 3,
+    description: 'O ID único da rota.',
+  })
+  id: number;
+
+  @ApiProperty({
+    example: 'Trilha das Sete Cachoeiras',
+    description: 'O nome da rota.',
+  })
+  name: string;
+
+  @ApiProperty({
+    example:
+      "Uma rota de aventura e ecoturismo que passa por sete quedas d'água deslumbrantes na Serra do Mar.",
+    description: 'A descrição completa da rota.',
+  })
+  description: string;
+
+  @ApiProperty({
+    example: ['aventura', 'cachoeira', 'natureza', 'trekking'],
+    description: 'Lista de tags associadas à rota.',
+    type: [String],
+  })
+  tags: string[];
+
+  @ApiProperty({
+    example: 4.5,
+    description: 'A nota média da rota (calculada baseada nas reviews).',
+  })
+  rating: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'A quantidade total de avaliações que esta rota recebeu.',
+  })
+  ratingCount: number;
+
+  @ApiProperty({
+    example: 13,
+    description: 'O ID do usuário criador (dono) da rota.',
+  })
+  ownerId: number;
+
+  @ApiProperty({
+    example: 'Matheus Augusto',
+    description: 'O nome do usuário criador da rota.',
+  })
+  ownerName: string;
+
+  @ApiProperty({
+    example: [
+      'https://onway-cdn-bucket.s3.us-east-1.amazonaws.com/rota-cover.jpg',
+    ],
+    description: 'Lista de URLs das imagens principais da rota.',
+    type: [String],
+  })
+  images: string[];
+
+  @ApiProperty({
+    type: () => FullRoutePointDTO,
+    isArray: true,
+    description: 'Lista ordenada de todos os pontos que compõem esta rota.',
+  })
+  @Type(() => FullRoutePointDTO)
+  points: FullRoutePointDTO[];
+
+  @ApiProperty({
+    type: () => RouteReviewDTO,
+    isArray: true,
+    description:
+      'Lista das avaliações (reviews) feitas pelos usuários para esta rota.',
+  })
+  @Type(() => RouteReviewDTO)
+  reviews: RouteReviewDTO[];
+}
+
+class UpdateRouteDTO extends PartialType(CreateRouteDTO) {}
+
+export {
+  CreateRouteDTO,
+  FullRouteDTO,
+  ResumedRouteDTO,
+  SucessfulCreatedRouteDTO,
+  UpdateRouteDTO,
+};
