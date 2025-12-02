@@ -6,6 +6,8 @@ import { DrizzleModule } from './drizzle/drizzle.module';
 import { EmailModule } from './email/email.module';
 import { RouteModule } from './route/route.module';
 import { UserModule } from './user/user.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { ProgressModule } from './progress/progress.module';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import { UserModule } from './user/user.module';
     EmailModule,
     CdnModule,
     RouteModule,
+    DashboardModule,
+    ProgressModule,
   ],
   controllers: [AppController],
   providers: [],

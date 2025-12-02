@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DrizzleQueryError, eq } from 'drizzle-orm';
+import { count, DrizzleQueryError, eq } from 'drizzle-orm';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
 import { NewUser, user, User, user as userModel } from 'src/drizzle/schema';
 import { RouteRepository } from 'src/route/route.repository';
@@ -94,5 +94,15 @@ export class UserRepository {
       .returning();
 
     return updatedUser;
+  }
+
+  async getUserCount(): Promise<number> {
+    const [quantityObj] = await this.drizzleService.db
+      .select({
+        quantity: count(user.id),
+      })
+      .from(user);
+
+    return quantityObj.quantity;
   }
 }
