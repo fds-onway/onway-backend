@@ -10,7 +10,7 @@ import { createHash } from 'crypto';
 import * as admin from 'firebase-admin';
 import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 import { User } from 'src/drizzle/schema';
-import { EmailService } from 'src/email/email.service';
+//import { EmailService } from 'src/email/email.service';
 import { UserRepository } from 'src/user/user.repository';
 import { UserService } from 'src/user/user.service';
 import { LoginDTO } from './auth.dto';
@@ -24,11 +24,12 @@ export class AuthService implements OnModuleInit {
     private readonly userService: UserService,
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
-    private readonly emailService: EmailService,
+    //private readonly emailService: EmailService,
   ) {}
 
   onModuleInit() {
     try {
+      return;
       const decodedKey = Buffer.from(
         process.env.FIREBASE_ADMIN_SECRET_BASE64!,
         'base64',
@@ -142,12 +143,13 @@ export class AuthService implements OnModuleInit {
     }
   }
 
-  async confirmEmailVerification(token: string) {
-    const user = await this.userRepository.findByToken(token);
+  //in this branch, use email as token to confirm login create.
+  async confirmEmailVerification(email: string) {
+    const user = await this.userRepository.findByEmail(email);
 
     if (!user) {
       throw new BadRequestException(
-        'Token de verificação inválido ou expirado.',
+        'email de verificação inválido ou expirado.',
       );
     }
 
@@ -156,22 +158,24 @@ export class AuthService implements OnModuleInit {
     return {};
   }
 
-  async sendPasswordResetEmail(email: string) {
-    const user = await this.userRepository.findByEmail(email);
+  sendPasswordResetEmail(email: string) {
+    console.log(email);
+    return;
+    // const user = await this.userRepository.findByEmail(email);
 
-    if (!user || user.provider !== 'local') return;
+    // if (!user || user.provider !== 'local') return;
 
-    const payload = { id: user.id, email: user.email };
-    const resetToken = this.jwtService.sign(payload, {
-      secret: this.passwordTokenSecret,
-      expiresIn: '10m',
-    });
+    // const payload = { id: user.id, email: user.email };
+    // const resetToken = this.jwtService.sign(payload, {
+    //   secret: this.passwordTokenSecret,
+    //   expiresIn: '10m',
+    // });
 
-    await this.emailService.sendPasswordResetEmail(
-      user.email,
-      user.name,
-      resetToken,
-    );
+    // await this.emailService.sendPasswordResetEmail(
+    //   user.email,
+    //   user.name,
+    //   resetToken,
+    // );
   }
 
   async resetPassword(token: string, newPassword: string): Promise<User> {

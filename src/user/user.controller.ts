@@ -3,6 +3,7 @@ import {
   ConflictException,
   Controller,
   HttpStatus,
+  Logger,
   Post,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -14,6 +15,8 @@ import { UserService } from './user.service';
 @Controller('user')
 @ApiTags('Usuários')
 export class UserController {
+  private readonly logger = new Logger(UserController.name);
+
   constructor(private readonly userService: UserService) {}
 
   @ApiOperation({ summary: 'Criar um novo usuário' })

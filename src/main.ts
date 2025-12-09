@@ -6,22 +6,23 @@ import {
   NestJSRedoxOptions,
   RedocOptions,
 } from 'nestjs-redox';
-import { AppModule } from './app.module';
+//import { AppModule } from './app.module';
+import { BusinessModule } from './core-business.module';
 
 async function bootstrap() {
   const requiredEnvVariables = [
-    'ENV',
-    'DOCKER_USERNAME',
+    //'ENV',
+    //'DOCKER_USERNAME',
     'POSTGRES_HOST',
     'POSTGRES_USER',
     'POSTGRES_PASSWORD',
     'POSTGRES_DB',
     'POSTGRES_PORT',
-    'GOOGLE_CLIENT_ID',
-    'GOOGLE_CLIENT_SECRET',
-    'GOOGLE_CALLBACK_URL',
-    'EMAIL_USER_ACCESS_KEY_ID',
-    'EMAIL_USER_SECRET_ACCESS_KEY',
+    // 'GOOGLE_CLIENT_ID',
+    // 'GOOGLE_CLIENT_SECRET',
+    // 'GOOGLE_CALLBACK_URL',
+    // 'EMAIL_USER_ACCESS_KEY_ID',
+    // 'EMAIL_USER_SECRET_ACCESS_KEY',
     'TOKEN_SECRET',
   ];
 
@@ -31,7 +32,7 @@ async function bootstrap() {
     }
   }
 
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(BusinessModule);
 
   app.enableCors();
 

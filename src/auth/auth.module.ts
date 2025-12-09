@@ -6,7 +6,7 @@ import { UserModule } from 'src/user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
-import { GoogleStrategy } from './google.strategy';
+//import { GoogleStrategy } from './google.strategy';
 import { IsAdminGuard } from './is-admin.guard';
 
 @Module({
@@ -21,7 +21,12 @@ import { IsAdminGuard } from './is-admin.guard';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, GoogleStrategy, IsAdminGuard, AuthGuard],
+  providers: [
+    AuthService,
+    // GoogleStrategy,
+    IsAdminGuard,
+    AuthGuard,
+  ],
   exports: [IsAdminGuard, AuthGuard],
 })
 export class AuthModule {}

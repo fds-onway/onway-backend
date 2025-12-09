@@ -20,7 +20,9 @@ export class EmailService {
     });
   }
 
+  // in this branch, the method always return ok, for the not use email validate on register,
   async sendVerificationEmail(to: string, name: string, token: string) {
+    return;
     const verificationUrl = `${this.apiUrl}/auth/verify-email?token=${token}`;
 
     const subject = 'Confirme seu e-mail para se cadastrar no OnWay';

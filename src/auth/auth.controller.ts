@@ -216,8 +216,8 @@ export class AuthController {
   })
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
-  async forgotPassword(@Body() body: ForgotPasswordDTO) {
-    await this.authService.sendPasswordResetEmail(body.email);
+  forgotPassword(@Body() body: ForgotPasswordDTO) {
+    this.authService.sendPasswordResetEmail(body.email);
     return {
       message:
         'Se um usuário com este e-mail estiver cadastrado, um link de redefinição será enviado.',
