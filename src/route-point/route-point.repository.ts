@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable } from '@nestjs/common';
-import { eq, ExtractTablesWithRelations, sql } from 'drizzle-orm';
+import { desc, eq, ExtractTablesWithRelations, sql } from 'drizzle-orm';
 import { NodePgQueryResultHKT } from 'drizzle-orm/node-postgres';
 import { PgTransaction } from 'drizzle-orm/pg-core';
 import { CdnService } from 'src/cdn/cdn.service';
@@ -31,6 +31,17 @@ export class RoutePointRepository {
       .from(routePoint)
       .where(eq(routePoint.id, id));
     return rtPoint;
+  }
+
+  async getLastRoutePoint(routeId: number) {
+    const [lastRoutePoint] = await this.drizzleService.db
+      .select()
+      .from(routePoint)
+      .where(eq(routePoint.route, routeId))
+      .orderBy(desc(routePoint.sequence))
+      .limit(1);
+
+    return lastRoutePoint;
   }
 
   async getAllPointsInOneRoute(routeId: number) {

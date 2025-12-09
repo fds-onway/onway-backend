@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { asc, eq, ExtractTablesWithRelations, sql } from 'drizzle-orm';
+import { asc, count, eq, ExtractTablesWithRelations, sql } from 'drizzle-orm';
 import { NodePgQueryResultHKT } from 'drizzle-orm/node-postgres';
 import { PgTransaction } from 'drizzle-orm/pg-core';
 import { CdnService } from 'src/cdn/cdn.service';
@@ -270,5 +270,15 @@ export class RouteRepository {
 
       await transaction.delete(routeImage).where(eq(routeImage.id, id));
     }
+  }
+
+  async getRouteCount(): Promise<number> {
+    const [quantityObj] = await this.drizzleService.db
+      .select({
+        quantity: count(route.id),
+      })
+      .from(route);
+
+    return quantityObj.quantity;
   }
 }

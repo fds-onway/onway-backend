@@ -66,12 +66,16 @@ async function bootstrap() {
         tags: ['Rotas', 'Reviews', 'Upvotes'],
       },
       {
+        name: 'Progresso',
+        tags: ['Progresso'],
+      },
+      {
         name: 'Imagens',
         tags: ['Imagens'],
       },
       {
         name: 'Utilitários',
-        tags: ['Utils', 'Miscelânia'],
+        tags: ['Utils', 'Miscelânia', 'Indicadores/KPIs'],
       },
     ],
   };
