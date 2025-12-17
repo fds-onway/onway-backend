@@ -1,0 +1,584 @@
+{
+	"info": {
+		"_postman_id": "3339d987-b141-4c10-8c8a-c9ebd8e580e9",
+		"name": "Fabrica 2",
+		"description": "# 🚀 Get started here\n\nThis template guides you through CRUD operations (GET, POST, PUT, DELETE), variables, and tests.\n\n## 🔖 **How to use this template**\n\n#### **Step 1: Send requests**\n\nRESTful APIs allow you to perform CRUD operations using the POST, GET, PUT, and DELETE HTTP methods.\n\nThis collection contains each of these [request](https://learning.postman.com/docs/sending-requests/requests/) types. Open each request and click \"Send\" to see what happens.\n\n#### **Step 2: View responses**\n\nObserve the response tab for status code (200 OK), response time, and size.\n\n#### **Step 3: Send new Body data**\n\nUpdate or add new data in \"Body\" in the POST request. Typically, Body data is also used in PUT request.\n\n```\n{\n    \"name\": \"Add your name in the body\"\n}\n\n ```\n\n#### **Step 4: Update the variable**\n\nVariables enable you to store and reuse values in Postman. We have created a [variable](https://learning.postman.com/docs/sending-requests/variables/) called `base_url` with the sample request [https://postman-api-learner.glitch.me](https://postman-api-learner.glitch.me). Replace it with your API endpoint to customize this collection.\n\n#### **Step 5: Add tests in the \"Scripts\" tab**\n\nAdding tests to your requests can help you confirm that your API is working as expected. You can write test scripts in JavaScript and view the output in the \"Test Results\" tab.\n\n<img src=\"https://content.pstmn.io/fa30ea0a-373d-4545-a668-e7b283cca343/aW1hZ2UucG5n\" alt=\"\" height=\"1530\" width=\"2162\">\n\n## 💪 Pro tips\n\n- Use folders to group related requests and organize the collection.\n    \n- Add more [scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/) to verify if the API works as expected and execute workflows.\n    \n\n## 💡Related templates\n\n[API testing basics](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9a37a28-055b-49cd-8c7e-97494a21eb54&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[API documentation](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9c28f47-1253-44af-a2f3-20dce4da1f18&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[Authorization methods](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=31a9a6ed-4cdf-4ced-984c-d12c9aec1c27&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33328572"
+	},
+	"item": [
+		{
+			"name": "Create",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const { Property } = require('postman-collection');",
+							"",
+							"const name = Property.replaceSubstitutions(\"{{$randomFullName}}\");",
+							"const email = Property.replaceSubstitutions(\"{{$randomEmail}}\");",
+							"const password = Property.replaceSubstitutions(\"{{$randomPassword}}\") + \"!\";",
+							"",
+							"",
+							"",
+							"pm.environment.set(\"name\", name);",
+							"pm.environment.set(\"email\", email);",
+							"pm.environment.set(\"password\", password);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Success', function(){",
+							"    pm.response.to.have.status(201);",
+							"    pm.collectionVariables.set(\"token\", pm.response.json().verificationToken);",
+							"    ",
+							"    let userId = pm.response.json().id;",
+							"",
+							"    pm.collectionVariables.set(\"user-id\", userId);",
+							"",
+							"    console.log(userId);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"{{name}}\",\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}user/register",
+					"host": [
+						"{{baseURL}}user"
+					],
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Valid-Create",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}auth/verify-email?token={{email}}",
+					"host": [
+						"{{baseURL}}auth"
+					],
+					"path": [
+						"verify-email"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "{{email}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"",
+							"",
+							"pm.environment.set(\"token\", pm.response.json().accessToken);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}auth/user",
+					"host": [
+						"{{baseURL}}auth"
+					],
+					"path": [
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "me",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}auth/me?user-id={{user-id}}",
+					"host": [
+						"{{baseURL}}auth"
+					],
+					"path": [
+						"me"
+					],
+					"query": [
+						{
+							"key": "user-id",
+							"value": "{{user-id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Rota",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"function randomLat() {",
+							"  return (-33.75 + Math.random() * (5.26 - -33.75)).toFixed(6);",
+							"}",
+							"",
+							"function randomLng() {",
+							"  return (-73.98 + Math.random() * (-34.79 - -73.98)).toFixed(6);",
+							"}",
+							"",
+							"const types = [",
+							"  'restaurante',",
+							"  'parque',",
+							"  'natureza',",
+							"  'servico',",
+							"  'hotel',",
+							"  'entretenimento',",
+							"  'miscelania'",
+							"];",
+							"",
+							"const sampleNames = [",
+							"  'Rio Encantado', 'Vale do Sol', 'Mirante Azul',",
+							"  'Cachoeira Cristal', 'Pico da Liberdade', 'Praia do Sossego'",
+							"];",
+							"",
+							"const sampleDescriptions = [",
+							"  'Lugar incrível para conhecer com a família.',",
+							"  'Área natural com belas paisagens.',",
+							"  'Ponto turístico conhecido na região.',",
+							"  'Excelente localização para descanso e lazer.',",
+							"  'Região com trilhas e cachoeiras para aventuras.'",
+							"];",
+							"",
+							"function randomImageUrl() {",
+							"  const bucket = pm.environment.get(\"CDN_BUCKET_NAME\") || \"bucket\";",
+							"  const region = pm.environment.get(\"AWS_REGION\") || \"sa-east-1\";",
+							"  const id = crypto.randomUUID();",
+							"  return `https://${bucket}.s3.${region}.amazonaws.com/points/${id}.jpg`;",
+							"}",
+							"",
+							"const count = Math.floor(Math.random() * 4) + 3; // 3 a 6 pontos",
+							"const points = [];",
+							"",
+							"for (let i = 0; i < count; i++) {",
+							"  points.push({",
+							"    name: sampleNames[Math.floor(Math.random() * sampleNames.length)],",
+							"    description: sampleDescriptions[Math.floor(Math.random() * sampleDescriptions.length)],",
+							"    type: types[Math.floor(Math.random() * types.length)],",
+							"    latitude: randomLat().toString(),",
+							"    longitude: randomLng().toString(),",
+							"    images: [",
+							"      {",
+							"        \"fileName\": randomImageUrl(),",
+							"        \"imageUrl\": randomImageUrl()",
+							"      }",
+							"    ]",
+							"  });",
+							"}",
+							"",
+							"let images = {",
+							"    \"fileName\": randomImageUrl(),",
+							"    \"imageUrl\": randomImageUrl()",
+							"}",
+							"",
+							"pm.environment.set(\"images\", JSON.stringify(images));",
+							"pm.environment.set(\"mockPoints\", JSON.stringify(points));",
+							"console.log(\"Mock points gerados:\", images);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"pm.environment.set(\"idRota\", pm.response.json().id);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Caminhos de São João\",\n    \"description\": \"Os Caminhos de São João são rotas turísticas e de peregrinação que ligam cidades históricas do interior de Minas Gerais, celebrando a fé, a cultura e as tradições locais.\",\n    \"tags\": [\n        \"Fé\",\n        \"Tradição\",\n        \"Cultura\",\n        \"Natureza\",\n        \"Comunidade\"\n    ],\n    \"points\": {{mockPoints}},\n    \"images\": [{{images}}]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}route",
+					"host": [
+						"{{baseURL}}route"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Rotas",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}route",
+					"host": [
+						"{{baseURL}}route"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "RotasById",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}route",
+					"host": [
+						"{{baseURL}}route"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Rota Copy",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"function randomLat() {",
+							"  return (-33.75 + Math.random() * (5.26 - -33.75)).toFixed(6);",
+							"}",
+							"",
+							"function randomLng() {",
+							"  return (-73.98 + Math.random() * (-34.79 - -73.98)).toFixed(6);",
+							"}",
+							"",
+							"const types = [",
+							"  'restaurante',",
+							"  'parque',",
+							"  'natureza',",
+							"  'servico',",
+							"  'hotel',",
+							"  'entretenimento',",
+							"  'miscelania'",
+							"];",
+							"",
+							"const sampleNames = [",
+							"  'Rio Encantado', 'Vale do Sol', 'Mirante Azul',",
+							"  'Cachoeira Cristal', 'Pico da Liberdade', 'Praia do Sossego'",
+							"];",
+							"",
+							"const sampleDescriptions = [",
+							"  'Lugar incrível para conhecer com a família.',",
+							"  'Área natural com belas paisagens.',",
+							"  'Ponto turístico conhecido na região.',",
+							"  'Excelente localização para descanso e lazer.',",
+							"  'Região com trilhas e cachoeiras para aventuras.'",
+							"];",
+							"",
+							"function randomImageUrl() {",
+							"  const bucket = pm.environment.get(\"CDN_BUCKET_NAME\") || \"bucket\";",
+							"  const region = pm.environment.get(\"AWS_REGION\") || \"sa-east-1\";",
+							"  const id = crypto.randomUUID();",
+							"  return `https://${bucket}.s3.${region}.amazonaws.com/points/${id}.jpg`;",
+							"}",
+							"",
+							"const count = Math.floor(Math.random() * 4) + 3; // 3 a 6 pontos",
+							"const points = [];",
+							"",
+							"for (let i = 0; i < count; i++) {",
+							"  points.push({",
+							"    name: sampleNames[Math.floor(Math.random() * sampleNames.length)],",
+							"    description: sampleDescriptions[Math.floor(Math.random() * sampleDescriptions.length)],",
+							"    type: types[Math.floor(Math.random() * types.length)],",
+							"    latitude: randomLat().toString(),",
+							"    longitude: randomLng().toString(),",
+							"    images: [",
+							"      {",
+							"        \"fileName\": randomImageUrl(),",
+							"        \"imageUrl\": randomImageUrl()",
+							"      }",
+							"    ]",
+							"  });",
+							"}",
+							"",
+							"let images = {",
+							"    \"fileName\": randomImageUrl(),",
+							"    \"imageUrl\": randomImageUrl()",
+							"}",
+							"",
+							"pm.environment.set(\"images\", JSON.stringify(images));",
+							"pm.environment.set(\"mockPoints\", JSON.stringify(points));",
+							"console.log(\"Mock points gerados:\", images);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Caminhos de São João\",\n    \"description\": \"Os Caminhos de São João são rotas turísticas e de peregrinação que ligam cidades históricas do interior de Minas Gerais, celebrando a fé, a cultura e as tradições locais.\",\n    \"tags\": [\n        \"Fé\",\n        \"Tradição\",\n        \"Cultura\",\n        \"Natureza\",\n        \"Comunidade\"\n    ],\n    \"points\": {{mockPoints}},\n    \"images\": [{{images}}]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}route/{{idRota}}",
+					"host": [
+						"{{baseURL}}route"
+					],
+					"path": [
+						"{{idRota}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "rota",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Caminhos de São João\",\n    \"description\": \"Os Caminhos de São João são rotas turísticas e de peregrinação que ligam cidades históricas do interior de Minas Gerais, celebrando a fé, a cultura e as tradições locais.\",\n    \"tags\": [\n        \"Fé\",\n        \"Tradição\",\n        \"Cultura\",\n        \"Natureza\",\n        \"Comunidade\"\n    ],\n    \"points\": {{mockPoints}},\n    \"images\": [{{images}}]\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}route/{{idRota}}",
+					"host": [
+						"{{baseURL}}route"
+					],
+					"path": [
+						"{{idRota}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "RotasByNF",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Sucess\", function () {",
+							"    pm.expect(pm.response.code).to.eql(404);",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}route",
+					"host": [
+						"{{baseURL}}route"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer"
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "localhost:3000/"
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "accessToken",
+			"value": ""
+		},
+		{
+			"key": "user-id",
+			"value": ""
+		}
+	]
+}
